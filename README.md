@@ -115,24 +115,31 @@ Chaque chapitre possède sa propre carte de lieux, ses repères, ses indices et
 son récit de victoire. Les boutons de chapitre chargent une nouvelle partie ;
 les placements de la partie précédente ne sont pas conservés.
 
+Les trois scénarios prédéfinis sont conçus pour admettre chacun exactement une
+solution. À chaque chargement, le solveur vérifie cette unicité avant
+d'afficher le chapitre. Si elle ne peut pas être certifiée (aucune solution,
+plusieurs solutions ou limite de calcul atteinte), le jeu génère en mémoire
+une grille unique de même taille et conserve les métadonnées du chapitre.
+
 ## Grilles aléatoires
 
 Les boutons **6×6**, **7×7**, **8×8** et **9×9** lancent la génération d'une
 énigme dans le navigateur. La taille détermine le nombre de lignes, de colonnes
-et de silhouettes utilisées. La grille associe des lieux, une permutation de
-placements cible, des repères adjacents et des indices calculés à partir de
-cette cible.
+et de silhouettes utilisées. Le générateur construit une carte de lieux
+connexes, choisit une permutation de placements cible, puis place des repères
+adjacents et compose des indices à partir de cette cible.
 
 Les indices générés varient les relations utilisées : proximité de repères,
 bordure ou coin, direction, distance et relations entre les lieux. Des règles
 ET/OU/NON peuvent aussi être utilisées pour exprimer des combinaisons sans
 remplacer la vérification d'unicité.
 
-Le solveur vérifie les grilles générées et le générateur ne présente une grille
-que lorsqu'il en a certifié une solution unique dans la limite de calcul prévue.
-La génération peut prendre un moment. Une grille aléatoire remplace le chapitre
-courant pour la session ; elle n'est pas enregistrée après le rechargement de la
-page.
+Le solveur vérifie chaque grille candidate ; elle n'est présentée qu'après la
+certification d'une solution unique dans la limite de recherche. Le générateur
+relance les séries de tentatives en cédant la main au navigateur entre elles ;
+la génération peut donc prendre un moment. Une grille aléatoire remplace le
+chapitre courant pour la session ; elle n'est pas enregistrée après le
+rechargement de la page.
 
 ## Solveur et indices
 

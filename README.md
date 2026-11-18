@@ -15,6 +15,7 @@ navigateur.
 - [Grilles aléatoires](#grilles-aléatoires)
 - [Solveur et indices](#solveur-et-indices)
 - [Technologies et architecture](#technologies-et-architecture)
+- [Publication GitHub Pages](#publication-github-pages)
 - [Développement et vérification](#développement-et-vérification)
 
 ## Fonctionnalités
@@ -151,6 +152,17 @@ est interrompue par sa limite, l'indice signale que le résultat est incomplet.
 
 L'état de jeu — placements, croix, chapitre et indices cochés — reste en mémoire
 dans la page. Un rechargement réinitialise la partie.
+
+## Publication GitHub Pages
+
+Le workflow [deploy-pages.yml](.github/workflows/deploy-pages.yml) publie
+automatiquement `index.html` sur GitHub Pages à chaque push vers `main`. Il peut
+aussi être lancé manuellement depuis l'onglet **Actions** avec
+**Deploy GitHub Pages**. Aucun build n'est nécessaire : le workflow prépare un
+artifact contenant uniquement la page du jeu.
+
+Après la première exécution réussie, le site est accessible à l'adresse :
+<https://vfarcy.github.io/Lovedoku/>.
 
 ## Développement et vérification
 

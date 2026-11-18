@@ -1,0 +1,2066 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>B. &amp; V. — Rendez-vous Secrets</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,400;1,600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --burgundy: #6b1d3a;
+      --burgundy-dark: #491126;
+      --rose-gold: #c67d63;
+      --cream: #fcf8f3;
+      --paper: #fffdf9;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: var(--cream);
+      background-image:
+        radial-gradient(circle at 12% 15%, rgba(244, 194, 194, 0.25) 0%, transparent 45%),
+        radial-gradient(circle at 88% 82%, rgba(212, 175, 55, 0.14) 0%, transparent 48%),
+        radial-gradient(rgba(107, 29, 58, 0.06) 1px, transparent 1px);
+      background-size: 100% 100%, 100% 100%, 24px 24px;
+      color: #2b1820;
+    }
+
+    .font-serif-romance {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+    }
+
+    .paper-card {
+      background: linear-gradient(180deg, #fffefb 0%, #fcf6ef 100%);
+      border: 1px solid rgba(198, 125, 99, 0.35);
+      box-shadow: 0 12px 32px -12px rgba(73, 17, 38, 0.14), 0 2px 6px rgba(107, 29, 58, 0.05);
+    }
+
+    .grid-board {
+      width: 100%;
+      max-width: 720px;
+      margin: 0 auto;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    .board-cell {
+      aspect-ratio: 1 / 1;
+      transition: transform 0.14s ease, box-shadow 0.18s ease, filter 0.18s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .board-cell:hover {
+      filter: brightness(0.975);
+      z-index: 10;
+      box-shadow: inset 0 0 0 2px rgba(107, 29, 58, 0.45);
+    }
+
+    .auto-crossed {
+      background-image: repeating-linear-gradient(
+        -45deg,
+        rgba(107, 29, 58, 0.05),
+        rgba(107, 29, 58, 0.05) 4px,
+        transparent 4px,
+        transparent 9px
+      );
+    }
+
+    .lovers-reunited-glow {
+      box-shadow: inset 0 0 18px rgba(225, 29, 72, 0.32), 0 0 12px rgba(244, 63, 94, 0.28);
+      animation: heartbeatGlow 2.4s infinite ease-in-out;
+    }
+
+    @keyframes heartbeatGlow {
+      0%, 100% { filter: brightness(1); }
+      50% { filter: brightness(1.04); }
+    }
+
+    @keyframes popIn {
+      0% { transform: scale(0.72); opacity: 0; }
+      75% { transform: scale(1.06); opacity: 1; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    .token-animate {
+      animation: popIn 0.22s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    }
+
+    @keyframes floatPetal {
+      0% { transform: translateY(-10vh) rotate(0deg) translateX(0); opacity: 0; }
+      15% { opacity: 0.9; }
+      85% { opacity: 0.85; }
+      100% { transform: translateY(105vh) rotate(540deg) translateX(45px); opacity: 0; }
+    }
+
+    .petal {
+      position: fixed;
+      top: -5vh;
+      pointer-events: none;
+      z-index: 60;
+      animation: floatPetal linear forwards;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+  <!-- Conteneur des pétales de victoire -->
+  <div id="petals-container" aria-hidden="true"></div>
+
+  <!-- En-tête éditorial -->
+  <header class="w-full border-b border-rose-200/70 bg-white/80 backdrop-blur-md sticky top-0 z-30">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex flex-wrap items-center justify-between gap-3">
+      <!-- Identité -->
+      <div class="flex items-center gap-3">
+        <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-[#6b1d3a] to-[#a8385d] text-amber-50 flex items-center justify-center shadow-md border border-amber-300/40 shrink-0">
+          <span class="font-serif-romance italic font-bold text-lg tracking-tight">B&amp;V</span>
+        </div>
+        <div>
+          <div class="flex items-center gap-2 flex-wrap">
+            <h1 class="font-serif-romance text-xl sm:text-2xl font-bold text-[#491126] leading-tight">
+              B. &amp; V. — Rendez-vous Secrets
+            </h1>
+            <span class="text-[11px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full bg-rose-100 text-[#6b1d3a] border border-rose-200">
+              Mode Détective
+            </span>
+          </div>
+          <p class="text-xs text-stone-600 hidden sm:block">
+            Déduction topologique &amp; rendez-vous clandestin à l'abri des regards
+          </p>
+        </div>
+      </div>
+
+      <!-- Navigation Chapitres & Générateur -->
+      <div class="flex flex-wrap items-center gap-1.5">
+        <button id="chap-btn-0" onclick="loadChapter(0)" class="px-3 py-1.5 rounded-xl text-xs font-semibold transition border">
+          Rendez-vous I (9×9)
+        </button>
+        <button id="chap-btn-1" onclick="loadChapter(1)" class="px-3 py-1.5 rounded-xl text-xs font-semibold transition border">
+          Rendez-vous II (9×9)
+        </button>
+        <button id="chap-btn-2" onclick="loadChapter(2)" class="px-3 py-1.5 rounded-xl text-xs font-semibold transition border">
+          Rendez-vous III (9×9)
+        </button>
+
+        <div class="h-5 w-px bg-rose-200 mx-1 hidden md:block"></div>
+
+        <div class="flex items-center gap-1 bg-rose-50/90 p-1 rounded-xl border border-rose-200/80">
+          <span class="text-[11px] font-semibold text-[#6b1d3a] px-1.5 hidden lg:inline">Aléa :</span>
+          <button onclick="generateRandomChapter(6)" class="px-2 py-1 rounded-lg text-[11px] font-semibold bg-white hover:bg-rose-100 text-[#6b1d3a] border border-rose-200 transition" title="Générer une énigme 6×6 certifiée unique">✨ 6×6</button>
+          <button onclick="generateRandomChapter(7)" class="px-2 py-1 rounded-lg text-[11px] font-semibold bg-white hover:bg-rose-100 text-[#6b1d3a] border border-rose-200 transition" title="Générer une énigme 7×7 certifiée unique">✨ 7×7</button>
+          <button onclick="generateRandomChapter(8)" class="px-2 py-1 rounded-lg text-[11px] font-semibold bg-white hover:bg-rose-100 text-[#6b1d3a] border border-rose-200 transition" title="Générer une énigme 8×8 certifiée unique">✨ 8×8</button>
+          <button onclick="generateRandomChapter(9)" class="px-2 py-1 rounded-lg text-[11px] font-semibold bg-white hover:bg-rose-100 text-[#6b1d3a] border border-rose-200 transition" title="Générer une énigme 9×9 certifiée unique">✨ 9×9</button>
+        </div>
+
+        <button onclick="toggleErgonomicsGuide()" id="ergo-toggle-btn" class="ml-1 px-2.5 py-1.5 rounded-xl text-xs font-semibold bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300/80 transition flex items-center gap-1" title="Ergonomie & Aide Intelligente (Touche ?)">
+          <span>🧭</span>
+          <span class="hidden sm:inline">Ergonomie &amp; Aide</span>
+          <span class="text-[10px] px-1.5 py-0.2 bg-amber-200/70 rounded">?</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Zone indicative : Ergonomie & Aide Intelligente -->
+  <section id="ergonomics-panel" class="hidden max-w-7xl w-full mx-auto px-4 sm:px-6 pt-4">
+    <div class="paper-card rounded-2xl p-4 sm:p-5 border-amber-300/80 bg-gradient-to-r from-amber-50/80 via-white to-rose-50/70">
+      <div class="flex items-start justify-between gap-4 mb-3">
+        <div>
+          <h2 class="font-serif-romance text-lg sm:text-xl font-bold text-[#491126] flex items-center gap-2">
+            <span>🧭 Ergonomie &amp; Aide Intelligente</span>
+            <span class="text-xs font-sans font-normal text-stone-500">(Raccourci clavier : touche <kbd class="px-1.5 py-0.5 bg-white border border-stone-300 rounded text-[11px]">?</kbd>)</span>
+          </h2>
+          <p class="text-xs text-stone-600 mt-0.5">
+            Conçue pour une déduction fluide sur ordinateur comme sur écran tactile, assistée par un solveur par contraintes (Backtracking + MRV).
+          </p>
+        </div>
+        <button onclick="toggleErgonomicsGuide()" class="text-xs font-semibold text-stone-500 hover:text-[#6b1d3a] px-2.5 py-1 rounded-lg hover:bg-rose-100/60 transition">
+          Fermer ✕
+        </button>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
+        <div class="bg-white/90 rounded-xl p-3.5 border border-rose-200/70">
+          <div class="font-bold text-[#6b1d3a] mb-1 flex items-center gap-1.5">
+            <span>🖱️ Contrôles &amp; Raccourcis</span>
+          </div>
+          <ul class="space-y-1 text-stone-700 leading-relaxed">
+            <li>• <strong>Clic gauche / Tap :</strong> pose ou retire la silhouette sélectionnée.</li>
+            <li>• <strong>Clic droit / Double-clic :</strong> pose ou retire une croix d'exclusion (<span class="font-bold text-rose-700">✕</span>).</li>
+            <li>• <strong><kbd class="px-1 bg-stone-100 border rounded">Ctrl+Z</kbd> :</strong> annule le dernier coup joué.</li>
+          </ul>
+        </div>
+
+        <div class="bg-white/90 rounded-xl p-3.5 border border-rose-200/70">
+          <div class="font-bold text-[#6b1d3a] mb-1 flex items-center gap-1.5">
+            <span>✨ Automatisation Intelligente</span>
+          </div>
+          <ul class="space-y-1 text-stone-700 leading-relaxed">
+            <li>• <strong>Auto-croix dynamique :</strong> hachure automatiquement les lignes/colonnes occupées et verrouille un lieu dès que <strong>B. &amp; V.</strong> y sont réunis.</li>
+            <li>• <strong>Carnet interactif :</strong> cliquez sur chaque indice pour le cocher au fur et à mesure de vos déductions.</li>
+          </ul>
+        </div>
+
+        <div class="bg-white/90 rounded-xl p-3.5 border border-rose-200/70">
+          <div class="font-bold text-[#6b1d3a] mb-1 flex items-center gap-1.5">
+            <span>⚙️ Moteur CSP &amp; Indice Logique</span>
+          </div>
+          <ul class="space-y-1 text-stone-700 leading-relaxed">
+            <li>• <strong>Analyse temps réel :</strong> vérifie à chaque coup si vos placements restent compatibles avec une solution.</li>
+            <li>• <strong>Indice logique :</strong> calcule les cases candidates restantes (heuristique MRV) ou isole précisément un pion en contradiction.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Contenu Principal -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 py-5 grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+
+    <!-- Colonne Gauche : Damier + Palette (7 colonnes sur grand écran) -->
+    <div class="lg:col-span-7 flex flex-col gap-4">
+
+      <!-- Bandeau titre du chapitre & statut CSP -->
+      <div class="paper-card rounded-2xl p-4 flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <div class="flex items-center gap-2 flex-wrap">
+            <span id="chapter-badge" class="text-[11px] font-bold uppercase tracking-wider text-rose-800 bg-rose-100/90 px-2.5 py-0.5 rounded-full">
+              Rendez-vous I
+            </span>
+            <span id="csp-status-badge" class="inline-flex items-center gap-1 text-[11px] font-semibold px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-900 border border-emerald-300">
+              <span>✅</span><span>Preuve CSP : 1 solution</span>
+            </span>
+          </div>
+          <h2 id="chapter-title" class="font-serif-romance text-2xl font-bold text-[#491126] mt-1">
+            Le Jardin d'Hiver
+          </h2>
+          <p id="chapter-subtitle" class="text-xs text-stone-600 mt-0.5">
+            Grille 9×9 • Réunissez B. et V. dans un même lieu, seuls et à l'abri des regards.
+          </p>
+        </div>
+
+        <div class="flex items-center gap-2 text-xs">
+          <span id="placed-counter" class="px-3 py-1.5 rounded-xl bg-rose-50 border border-rose-200 font-semibold text-[#6b1d3a]">
+            0 / 9 placés
+          </span>
+          <span id="hovered-coord-badge" class="px-2.5 py-1.5 rounded-xl bg-stone-100 border border-stone-200 font-mono text-[11px] text-stone-600 min-w-[78px] text-center">
+            Case —
+          </span>
+        </div>
+      </div>
+
+      <!-- Palette des silhouettes & Outils -->
+      <div class="paper-card rounded-2xl p-3.5">
+        <div class="flex items-center justify-between gap-2 mb-2.5 flex-wrap">
+          <span class="text-xs font-bold uppercase tracking-wider text-[#6b1d3a]">
+            Silhouettes à placer
+          </span>
+          <div class="flex items-center gap-1.5 flex-wrap">
+            <button id="cross-mode-btn" onclick="toggleCrossMode()" class="px-2.5 py-1 rounded-xl text-xs font-semibold border transition flex items-center gap-1 bg-white text-stone-700 border-stone-300 hover:bg-rose-50">
+              <span>✕</span><span>Mode Croix</span>
+            </button>
+            <button id="auto-cross-btn" onclick="toggleAutoCross()" class="px-2.5 py-1 rounded-xl text-xs font-semibold border transition flex items-center gap-1 bg-rose-100 text-[#6b1d3a] border-rose-300">
+              <span>🪄</span><span>Auto-croix : ON</span>
+            </button>
+            <button id="undo-btn" onclick="undoAction()" disabled class="px-2.5 py-1 rounded-xl text-xs font-semibold border border-stone-300 bg-white text-stone-600 hover:bg-stone-100 disabled:opacity-40 transition">
+              ↩ Annuler
+            </button>
+            <button onclick="resetCurrentChapter()" class="px-2.5 py-1 rounded-xl text-xs font-semibold border border-stone-300 bg-white text-stone-600 hover:bg-rose-50 hover:text-rose-800 transition">
+              ↺ Vider
+            </button>
+          </div>
+        </div>
+
+        <div id="tokens-palette" class="grid grid-cols-3 sm:grid-cols-5 gap-2"></div>
+      </div>
+
+      <!-- Damier du jeu -->
+      <div class="paper-card rounded-2xl p-3 sm:p-5">
+        <div id="grid-wrapper" class="grid-board"></div>
+
+        <!-- Légende des lieux du chapitre -->
+        <div class="mt-4 pt-3 border-t border-rose-200/70">
+          <div class="text-[11px] font-bold uppercase tracking-wider text-stone-500 mb-2">
+            Lieux du domaine (B. &amp; V. doivent partager le même lieu, sans aucun témoin)
+          </div>
+          <div id="places-legend" class="flex flex-wrap gap-1.5"></div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Colonne Droite : Carnet d'indices & Actions de déduction (5 colonnes) -->
+    <aside class="lg:col-span-5 flex flex-col gap-4 lg:sticky lg:top-20">
+      <div class="paper-card rounded-2xl p-4 sm:p-5">
+        <div class="flex items-center justify-between gap-2 pb-3 border-b border-rose-200/80">
+          <div>
+            <span class="text-[11px] font-bold uppercase tracking-wider text-rose-700">Carnet de déduction</span>
+            <h3 class="font-serif-romance text-xl font-bold text-[#491126]">
+              Indices &amp; Témoignages
+            </h3>
+          </div>
+          <span class="text-xs text-stone-500 italic">Cliquez pour cocher</span>
+        </div>
+
+        <!-- Règle d'or rappelée -->
+        <div class="mt-3 p-3 rounded-xl bg-gradient-to-r from-rose-50 to-amber-50/70 border border-rose-200/90 text-xs text-[#491126] leading-relaxed">
+          <strong>Règle d'Or :</strong> Chaque ligne et chaque colonne accueille <strong>exactement une silhouette</strong>. <strong>B.</strong> et <strong>V.</strong> se retrouvent dans le <strong>même lieu coloré</strong>, sans aucun autre témoin dans cette pièce.
+        </div>
+
+        <!-- Liste des indices -->
+        <ul id="clues-list" class="mt-3.5 space-y-2"></ul>
+
+        <!-- Zone de feedback dynamique -->
+        <div id="feedback-banner" class="hidden mt-4 p-3.5 rounded-xl text-xs leading-relaxed border"></div>
+
+        <!-- Boutons d'action -->
+        <div class="mt-4 pt-3 border-t border-rose-200/70 grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+          <button onclick="giveDeductionHint()" class="px-4 py-2.5 rounded-xl text-xs font-bold bg-amber-50 hover:bg-amber-100 text-amber-950 border border-amber-300 shadow-sm transition flex items-center justify-center gap-1.5">
+            <span>💡</span><span>Indice logique (CSP)</span>
+          </button>
+          <button onclick="verifyInquiry()" class="px-4 py-2.5 rounded-xl text-xs font-bold bg-gradient-to-r from-[#6b1d3a] to-[#982b52] hover:from-[#56152e] hover:to-[#7e2243] text-white shadow-md transition flex items-center justify-center gap-1.5">
+            <span>💌</span><span>Sceller le rendez-vous</span>
+          </button>
+        </div>
+      </div>
+    </aside>
+
+  </main>
+
+  <!-- Modale de Victoire -->
+  <div id="victory-modal" class="hidden fixed inset-0 z-50 bg-stone-950/60 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="paper-card max-w-lg w-full rounded-3xl p-6 sm:p-8 text-center relative overflow-hidden border-2 border-amber-300/80 shadow-2xl">
+      <div class="flex items-center justify-center gap-4 mb-4">
+        <div id="victory-portrait-b" class="w-16 h-16 rounded-full border-2 border-[#6b1d3a] overflow-hidden shadow-md bg-[#fcf8f3]"></div>
+        <div class="text-2xl text-rose-600 animate-pulse">♥</div>
+        <div id="victory-portrait-v" class="w-16 h-16 rounded-full border-2 border-[#c67d63] overflow-hidden shadow-md bg-[#fcf8f3]"></div>
+      </div>
+
+      <span class="text-[11px] font-bold uppercase tracking-widest text-rose-700 bg-rose-100 px-3 py-1 rounded-full">
+        Rendez-vous accompli
+      </span>
+      <h3 id="victory-title" class="font-serif-romance text-3xl font-bold text-[#491126] mt-2">
+        Un instant hors du temps
+      </h3>
+      <p id="victory-place-label" class="text-xs font-semibold text-amber-900 mt-1"></p>
+      <p id="victory-story" class="font-serif-romance italic text-lg text-stone-700 mt-4 leading-relaxed bg-rose-50/70 p-4 rounded-2xl border border-rose-200/70"></p>
+
+      <div class="mt-6 flex flex-wrap items-center justify-center gap-3">
+        <button onclick="closeVictoryModal()" class="px-4 py-2.5 rounded-xl text-xs font-semibold bg-white hover:bg-stone-100 text-stone-700 border border-stone-300 transition">
+          Contempler la grille
+        </button>
+        <button onclick="nextChapter()" class="px-5 py-2.5 rounded-xl text-xs font-bold bg-gradient-to-r from-[#6b1d3a] to-[#982b52] text-white shadow-md hover:opacity-95 transition">
+          Rendez-vous suivant →
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // =========================================================================
+    // 1. ILLUSTRATIONS VECTORIELLES CALLIGRAPHIQUES & REPÈRES ROMANTIQUES
+    // =========================================================================
+    const SVG_ART = {
+      // Portrait calligraphique de B. (profil tourné vers la gauche, tresses, sourire)
+      womanB: `
+        <svg viewBox="0 0 120 120" class="w-full h-full" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="braidGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#3b160c"/>
+              <stop offset="55%" stop-color="#6e2c18"/>
+              <stop offset="100%" stop-color="#b8653b"/>
+            </linearGradient>
+            <linearGradient id="skinWarm" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#d8875a"/>
+              <stop offset="100%" stop-color="#8c3f23"/>
+            </linearGradient>
+          </defs>
+          <rect width="120" height="120" fill="#fcf8f3"/>
+          <!-- Épaules calligraphiques -->
+          <path d="M12 112 C28 96, 46 98, 56 114" fill="none" stroke="url(#braidGrad)" stroke-width="3.2" stroke-linecap="round"/>
+          <path d="M62 115 C78 96, 102 98, 112 114" fill="none" stroke="url(#skinWarm)" stroke-width="3" stroke-linecap="round"/>
+          <!-- Cou et mâchoire douce -->
+          <path d="M32 82 C34 94, 46 95, 58 84 C66 77, 71 67, 72 58" fill="none" stroke="url(#braidGrad)" stroke-width="3.2" stroke-linecap="round"/>
+          <path d="M48 92 L53 108" fill="none" stroke="url(#skinWarm)" stroke-width="3" stroke-linecap="round"/>
+          <!-- Profil du front, nez et lèvres souriantes -->
+          <path d="M30 32 C22 42, 21 51, 24 56 C20 61, 18 65, 22 68 C25 70, 29 69, 32 67" fill="none" stroke="url(#braidGrad)" stroke-width="2.6" stroke-linecap="round"/>
+          <!-- Sourcil et paupière fermée aux cils -->
+          <path d="M31 44 C36 40, 43 40, 47 42" fill="none" stroke="url(#braidGrad)" stroke-width="2.1" stroke-linecap="round"/>
+          <path d="M33 52 C38 52, 43 49, 47 47" fill="none" stroke="#2d1008" stroke-width="2.6" stroke-linecap="round"/>
+          <path d="M32 52 L29 50 M35 53 L33 55" stroke="#2d1008" stroke-width="1.3" stroke-linecap="round"/>
+          <!-- Pommette & sourire -->
+          <path d="M58 49 C61 55, 58 63, 52 68" fill="none" stroke="url(#skinWarm)" stroke-width="2.4" stroke-linecap="round"/>
+          <path d="M27 74 C33 73, 39 73, 43 71" fill="none" stroke="url(#braidGrad)" stroke-width="2.4" stroke-linecap="round"/>
+          <path d="M29 77 C34 81, 40 80, 43 74" fill="none" stroke="url(#skinWarm)" stroke-width="2.1" stroke-linecap="round"/>
+          <!-- Doubles créoles -->
+          <ellipse cx="70" cy="68" rx="4.5" ry="7" fill="none" stroke="url(#braidGrad)" stroke-width="2"/>
+          <ellipse cx="70" cy="77" rx="4.2" ry="6.2" fill="none" stroke="url(#skinWarm)" stroke-width="1.8"/>
+          <!-- Tresses calligraphiques cascadantes -->
+          <path d="M28 32 C34 16, 56 12, 74 22 C88 30, 96 52, 102 88" fill="none" stroke="url(#braidGrad)" stroke-width="4.5" stroke-linecap="round"/>
+          <path d="M34 28 C46 18, 66 18, 80 32 C92 44, 96 68, 96 96" fill="none" stroke="url(#braidGrad)" stroke-width="4.2" stroke-linecap="round"/>
+          <path d="M40 27 C54 22, 70 26, 80 42 C88 56, 89 78, 86 102" fill="none" stroke="url(#braidGrad)" stroke-width="4" stroke-linecap="round"/>
+          <path d="M48 29 C60 28, 72 36, 78 52 C83 68, 81 88, 74 106" fill="none" stroke="url(#braidGrad)" stroke-width="3.8" stroke-linecap="round"/>
+          <path d="M56 34 C66 36, 73 46, 75 62 C76 78, 72 95, 63 108" fill="none" stroke="url(#braidGrad)" stroke-width="3.5" stroke-linecap="round"/>
+        </svg>
+      `,
+      // Portrait calligraphique de V. (crâne dégarni, lunettes rectangulaires, sourire chaleureux)
+      manV: `
+        <svg viewBox="0 0 120 120" class="w-full h-full" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="copperInk" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#3d170a"/>
+              <stop offset="50%" stop-color="#8b4222"/>
+              <stop offset="100%" stop-color="#d4834e"/>
+            </linearGradient>
+          </defs>
+          <rect width="120" height="120" fill="#fcf8f3"/>
+          <!-- Épaules -->
+          <path d="M10 112 C22 100, 34 104, 42 115" fill="none" stroke="url(#copperInk)" stroke-width="3.2" stroke-linecap="round"/>
+          <path d="M84 106 C96 102, 108 106, 114 114" fill="none" stroke="url(#copperInk)" stroke-width="3.2" stroke-linecap="round"/>
+          <!-- Contour du crâne et mâchoire -->
+          <path d="M26 52 C24 26, 48 12, 74 16 C96 20, 106 38, 103 62 C100 84, 92 104, 74 106 C56 108, 38 94, 28 76" fill="none" stroke="url(#copperInk)" stroke-width="3.2" stroke-linecap="round"/>
+          <!-- Oreille gauche -->
+          <path d="M26 48 C18 46, 15 58, 20 69 C23 75, 29 75, 31 70" fill="none" stroke="url(#copperInk)" stroke-width="2.8" stroke-linecap="round"/>
+          <path d="M24 54 C21 57, 22 64, 26 66" fill="none" stroke="url(#copperInk)" stroke-width="1.8" stroke-linecap="round"/>
+          <!-- Sourcils -->
+          <path d="M46 42 C54 39, 62 40, 67 43" fill="none" stroke="url(#copperInk)" stroke-width="2.2" stroke-linecap="round"/>
+          <path d="M80 44 C86 42, 93 43, 98 46" fill="none" stroke="url(#copperInk)" stroke-width="2.2" stroke-linecap="round"/>
+          <!-- Lunettes rectangulaires -->
+          <path d="M28 45 L46 50" stroke="url(#copperInk)" stroke-width="2.6" stroke-linecap="round"/>
+          <rect x="46" y="47" width="24" height="14" rx="3.5" transform="rotate(6 58 54)" fill="none" stroke="#3d170a" stroke-width="2.5"/>
+          <path d="M70 54 L77 55" stroke="#3d170a" stroke-width="2.4" stroke-linecap="round"/>
+          <rect x="77" y="50" width="21" height="14" rx="3.5" transform="rotate(6 87 57)" fill="none" stroke="#3d170a" stroke-width="2.5"/>
+          <!-- Yeux bienveillants -->
+          <path d="M51 54 C55 52, 61 53, 64 55" fill="none" stroke="#3d170a" stroke-width="2.2" stroke-linecap="round"/>
+          <path d="M82 57 C86 55, 91 56, 94 58" fill="none" stroke="#3d170a" stroke-width="2.2" stroke-linecap="round"/>
+          <!-- Nez & plis du sourire -->
+          <path d="M74 56 C76 64, 79 70, 74 73 C70 75, 66 74, 64 72" fill="none" stroke="url(#copperInk)" stroke-width="2.3" stroke-linecap="round"/>
+          <path d="M55 74 C49 78, 46 84, 46 89" fill="none" stroke="url(#copperInk)" stroke-width="2.1" stroke-linecap="round"/>
+          <path d="M55 82 C64 88, 76 89, 85 84" fill="none" stroke="#3d170a" stroke-width="2.6" stroke-linecap="round"/>
+          <path d="M64 93 C69 95, 75 95, 79 93" fill="none" stroke="url(#copperInk)" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      `,
+      // Portrait calligraphique de Bibiche (chignon haut élégant, perle d'oreille)
+      witnessBi: `
+        <svg viewBox="0 0 120 120" class="w-full h-full" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="inkBi" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#491126"/>
+              <stop offset="55%" stop-color="#8b2c4b"/>
+              <stop offset="100%" stop-color="#c67d63"/>
+            </linearGradient>
+          </defs>
+          <rect width="120" height="120" fill="#fcf8f3"/>
+          <!-- Chignon haut calligraphique -->
+          <path d="M66 24 C74 10, 94 12, 96 28 C98 40, 84 46, 74 40" fill="none" stroke="url(#inkBi)" stroke-width="3.6" stroke-linecap="round"/>
+          <path d="M72 22 C80 15, 90 19, 90 29" fill="none" stroke="url(#inkBi)" stroke-width="2.4" stroke-linecap="round"/>
+          <!-- Chevelure relevée & profil doux -->
+          <path d="M36 36 C44 22, 66 22, 78 36 C86 48, 86 68, 78 82" fill="none" stroke="url(#inkBi)" stroke-width="3.4" stroke-linecap="round"/>
+          <path d="M36 36 C30 46, 29 53, 32 58 C27 63, 26 67, 30 70 C33 72, 37 71, 39 69" fill="none" stroke="url(#inkBi)" stroke-width="2.6" stroke-linecap="round"/>
+          <!-- Sourcil, œil malicieux & sourire -->
+          <path d="M38 47 C43 44, 49 44, 53 46" fill="none" stroke="url(#inkBi)" stroke-width="2" stroke-linecap="round"/>
+          <path d="M40 54 C44 52, 49 52, 52 54" fill="none" stroke="#3b0d1e" stroke-width="2.4" stroke-linecap="round"/>
+          <path d="M35 76 C41 78, 47 77, 50 74" fill="none" stroke="url(#inkBi)" stroke-width="2.3" stroke-linecap="round"/>
+          <!-- Perle & col -->
+          <circle cx="71" cy="68" r="3.5" fill="none" stroke="url(#inkBi)" stroke-width="2.2"/>
+          <path d="M44 85 C47 96, 58 96, 68 85" fill="none" stroke="url(#inkBi)" stroke-width="2.8" stroke-linecap="round"/>
+          <path d="M22 112 C38 98, 78 98, 98 112" fill="none" stroke="url(#inkBi)" stroke-width="3" stroke-linecap="round"/>
+        </svg>
+      `,
+      // Portrait calligraphique d'Irène (carré ondulé rétro, béret incliné)
+      witnessIr: `
+        <svg viewBox="0 0 120 120" class="w-full h-full" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="inkIr" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#3b160c"/>
+              <stop offset="50%" stop-color="#7c3322"/>
+              <stop offset="100%" stop-color="#c97a53"/>
+            </linearGradient>
+          </defs>
+          <rect width="120" height="120" fill="#fcf8f3"/>
+          <!-- Béret incliné -->
+          <path d="M32 34 C42 16, 84 14, 96 28 C100 33, 92 40, 78 38" fill="none" stroke="url(#inkIr)" stroke-width="3.2" stroke-linecap="round"/>
+          <path d="M68 18 L72 13" stroke="url(#inkIr)" stroke-width="2.4" stroke-linecap="round"/>
+          <!-- Carré ondulé encadrant le visage -->
+          <path d="M36 36 C28 50, 26 68, 34 82 C38 88, 44 88, 46 82" fill="none" stroke="url(#inkIr)" stroke-width="3.4" stroke-linecap="round"/>
+          <path d="M84 36 C92 50, 94 68, 86 82 C82 88, 76 88, 74 82" fill="none" stroke="url(#inkIr)" stroke-width="3.4" stroke-linecap="round"/>
+          <!-- Ovale du visage de trois-quarts -->
+          <path d="M40 42 C39 64, 46 86, 60 88 C74 86, 81 64, 80 42" fill="none" stroke="url(#inkIr)" stroke-width="2.6" stroke-linecap="round"/>
+          <!-- Yeux, nez & sourire -->
+          <path d="M46 53 C50 51, 54 51, 57 53" fill="none" stroke="#3b160c" stroke-width="2.2" stroke-linecap="round"/>
+          <path d="M65 53 C68 51, 72 51, 75 53" fill="none" stroke="#3b160c" stroke-width="2.2" stroke-linecap="round"/>
+          <path d="M60 55 C59 62, 58 66, 62 68" fill="none" stroke="url(#inkIr)" stroke-width="2" stroke-linecap="round"/>
+          <path d="M52 75 C57 79, 64 79, 69 75" fill="none" stroke="#3b160c" stroke-width="2.3" stroke-linecap="round"/>
+          <path d="M26 112 C42 98, 78 98, 94 112" fill="none" stroke="url(#inkIr)" stroke-width="3" stroke-linecap="round"/>
+        </svg>
+      `,
+      // Portrait calligraphique de Mika (cheveux bouclés souples, col roulé)
+      witnessMi: `
+        <svg viewBox="0 0 120 120" class="w-full h-full" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="inkMi" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#3a1912"/>
+              <stop offset="55%" stop-color="#7f3b26"/>
+              <stop offset="100%" stop-color="#c88255"/>
+            </linearGradient>
+          </defs>
+          <rect width="120" height="120" fill="#fcf8f3"/>
+          <!-- Boucles aériennes au sommet -->
+          <path d="M34 42 C28 30, 38 18, 50 22 C56 14, 72 14, 78 24 C88 22, 94 34, 86 44" fill="none" stroke="url(#inkMi)" stroke-width="3.5" stroke-linecap="round"/>
+          <path d="M40 34 C48 26, 68 26, 78 35" fill="none" stroke="url(#inkMi)" stroke-width="2.4" stroke-linecap="round"/>
+          <!-- Mâchoire affirmée & oreille -->
+          <path d="M38 44 C37 66, 46 84, 60 87 C74 84, 83 66, 82 44" fill="none" stroke="url(#inkMi)" stroke-width="2.8" stroke-linecap="round"/>
+          <path d="M37 54 C32 54, 31 63, 36 66" fill="none" stroke="url(#inkMi)" stroke-width="2.2" stroke-linecap="round"/>
+          <!-- Sourcils, regard & sourire franc -->
+          <path d="M45 48 C50 46, 54 47, 57 48" fill="none" stroke="url(#inkMi)" stroke-width="2.2" stroke-linecap="round"/>
+          <path d="M64 48 C68 47, 72 46, 76 48" fill="none" stroke="url(#inkMi)" stroke-width="2.2" stroke-linecap="round"/>
+          <path d="M47 54 C50 53, 53 53, 56 54" fill="none" stroke="#3a1912" stroke-width="2.2" stroke-linecap="round"/>
+          <path d="M65 54 C68 53, 71 53, 74 54" fill="none" stroke="#3a1912" stroke-width="2.2" stroke-linecap="round"/>
+          <path d="M60 54 C60 61, 62 65, 58 67" fill="none" stroke="url(#inkMi)" stroke-width="2" stroke-linecap="round"/>
+          <path d="M51 74 C57 78, 65 78, 70 73" fill="none" stroke="#3a1912" stroke-width="2.4" stroke-linecap="round"/>
+          <!-- Col roulé & épaules -->
+          <path d="M48 87 L48 99 C55 101, 65 101, 72 99 L72 87" fill="none" stroke="url(#inkMi)" stroke-width="2.6" stroke-linecap="round"/>
+          <path d="M20 113 C34 101, 86 101, 100 113" fill="none" stroke="url(#inkMi)" stroke-width="3.2" stroke-linecap="round"/>
+        </svg>
+      `,
+      // Portrait calligraphique de Ghyslaine (boucles longues, lunettes rondes fines)
+      witnessGh: `
+        <svg viewBox="0 0 120 120" class="w-full h-full" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="inkGh" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#4a152b"/>
+              <stop offset="55%" stop-color="#8e3452"/>
+              <stop offset="100%" stop-color="#cf8465"/>
+            </linearGradient>
+          </defs>
+          <rect width="120" height="120" fill="#fcf8f3"/>
+          <!-- Ondulations longues -->
+          <path d="M60 18 C36 18, 24 38, 26 66 C28 84, 22 96, 18 104" fill="none" stroke="url(#inkGh)" stroke-width="3.6" stroke-linecap="round"/>
+          <path d="M60 18 C84 18, 96 38, 94 66 C92 84, 98 96, 102 104" fill="none" stroke="url(#inkGh)" stroke-width="3.6" stroke-linecap="round"/>
+          <!-- Visage doux -->
+          <path d="M40 42 C39 64, 47 84, 60 86 C73 84, 81 64, 80 42" fill="none" stroke="url(#inkGh)" stroke-width="2.5" stroke-linecap="round"/>
+          <!-- Lunettes rondes calligraphiques -->
+          <circle cx="50" cy="54" r="7.5" fill="none" stroke="#4a152b" stroke-width="2"/>
+          <circle cx="70" cy="54" r="7.5" fill="none" stroke="#4a152b" stroke-width="2"/>
+          <path d="M57.5 54 L62.5 54" stroke="#4a152b" stroke-width="2"/>
+          <!-- Nez & sourire -->
+          <path d="M60 56 C59 62, 58 66, 61 67" fill="none" stroke="url(#inkGh)" stroke-width="1.9" stroke-linecap="round"/>
+          <path d="M52 74 C57 78, 63 78, 68 74" fill="none" stroke="#4a152b" stroke-width="2.2" stroke-linecap="round"/>
+          <path d="M30 112 C44 99, 76 99, 90 112" fill="none" stroke="url(#inkGh)" stroke-width="2.8" stroke-linecap="round"/>
+        </svg>
+      `,
+      // Portrait calligraphique de Justine (queue-de-cheval dynamique, frange légère)
+      witnessJ: `
+        <svg viewBox="0 0 120 120" class="w-full h-full" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="inkJ" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#3d170a"/>
+              <stop offset="50%" stop-color="#944324"/>
+              <stop offset="100%" stop-color="#d88b58"/>
+            </linearGradient>
+          </defs>
+          <rect width="120" height="120" fill="#fcf8f3"/>
+          <!-- Queue-de-cheval fluide sur le côté -->
+          <path d="M74 28 C92 24, 104 42, 100 66 C98 78, 102 88, 106 94" fill="none" stroke="url(#inkJ)" stroke-width="3.8" stroke-linecap="round"/>
+          <path d="M76 34 C90 34, 96 48, 92 70" fill="none" stroke="url(#inkJ)" stroke-width="2.5" stroke-linecap="round"/>
+          <!-- Sommet & frange -->
+          <path d="M34 44 C36 24, 62 18, 76 30" fill="none" stroke="url(#inkJ)" stroke-width="3.2" stroke-linecap="round"/>
+          <path d="M36 42 C44 36, 54 36, 62 41" fill="none" stroke="url(#inkJ)" stroke-width="2.2" stroke-linecap="round"/>
+          <!-- Profil tourné vers la droite -->
+          <path d="M76 32 C82 42, 83 50, 80 55 C85 60, 86 64, 82 67 C79 69, 75 68, 73 66" fill="none" stroke="url(#inkJ)" stroke-width="2.5" stroke-linecap="round"/>
+          <path d="M62 51 C66 49, 71 49, 74 51" fill="none" stroke="#3d170a" stroke-width="2.3" stroke-linecap="round"/>
+          <path d="M64 74 C69 76, 75 75, 78 72" fill="none" stroke="url(#inkJ)" stroke-width="2.2" stroke-linecap="round"/>
+          <path d="M44 74 C46 88, 58 92, 68 83" fill="none" stroke="url(#inkJ)" stroke-width="2.7" stroke-linecap="round"/>
+          <path d="M24 112 C40 98, 78 98, 94 112" fill="none" stroke="url(#inkJ)" stroke-width="3" stroke-linecap="round"/>
+        </svg>
+      `,
+      // Portrait calligraphique de Mylène (chevelure vaporeuse en volutes artistiques)
+      witnessMy: `
+        <svg viewBox="0 0 120 120" class="w-full h-full" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="inkMy" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#581833"/>
+              <stop offset="55%" stop-color="#a63c5b"/>
+              <stop offset="100%" stop-color="#dc8b6e"/>
+            </linearGradient>
+          </defs>
+          <rect width="120" height="120" fill="#fcf8f3"/>
+          <!-- Volutes vaporeuses -->
+          <path d="M36 48 C22 40, 22 20, 42 18 C54 12, 74 14, 82 24 C98 26, 98 48, 84 56" fill="none" stroke="url(#inkMy)" stroke-width="3.4" stroke-linecap="round"/>
+          <path d="M30 62 C20 72, 22 90, 34 98" fill="none" stroke="url(#inkMy)" stroke-width="2.8" stroke-linecap="round"/>
+          <path d="M90 62 C100 72, 98 90, 86 98" fill="none" stroke="url(#inkMy)" stroke-width="2.8" stroke-linecap="round"/>
+          <!-- Visage fin -->
+          <path d="M41 42 C40 63, 48 83, 60 85 C72 83, 80 63, 79 42" fill="none" stroke="url(#inkMy)" stroke-width="2.5" stroke-linecap="round"/>
+          <!-- Regard rêveur & lèvres esquissées -->
+          <path d="M46 52 C50 50, 54 50, 57 52" fill="none" stroke="#581833" stroke-width="2.2" stroke-linecap="round"/>
+          <path d="M63 52 C66 50, 70 50, 74 52" fill="none" stroke="#581833" stroke-width="2.2" stroke-linecap="round"/>
+          <path d="M60 54 C59 61, 58 65, 61 66" fill="none" stroke="url(#inkMy)" stroke-width="1.9" stroke-linecap="round"/>
+          <path d="M53 74 C57 77, 63 77, 67 74" fill="none" stroke="#581833" stroke-width="2.2" stroke-linecap="round"/>
+          <path d="M30 112 C45 99, 75 99, 90 112" fill="none" stroke="url(#inkMy)" stroke-width="2.8" stroke-linecap="round"/>
+        </svg>
+      `,
+      // Portrait calligraphique de Laetitia (raie sur le côté, ruban/broche délicate)
+      witnessL: `
+        <svg viewBox="0 0 120 120" class="w-full h-full" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="inkL" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#3b160c"/>
+              <stop offset="55%" stop-color="#873c24"/>
+              <stop offset="100%" stop-color="#cf8656"/>
+            </linearGradient>
+          </defs>
+          <rect width="120" height="120" fill="#fcf8f3"/>
+          <!-- Mèche asymétrique élégante -->
+          <path d="M46 22 C66 16, 88 28, 92 54 C94 72, 88 90, 82 102" fill="none" stroke="url(#inkL)" stroke-width="3.6" stroke-linecap="round"/>
+          <path d="M46 22 C32 28, 26 48, 30 74 C32 86, 36 96, 40 102" fill="none" stroke="url(#inkL)" stroke-width="3.2" stroke-linecap="round"/>
+          <path d="M46 22 C54 34, 68 40, 82 42" fill="none" stroke="url(#inkL)" stroke-width="2.4" stroke-linecap="round"/>
+          <!-- Visage harmonieux -->
+          <path d="M41 44 C41 65, 48 84, 60 86 C72 84, 79 65, 79 44" fill="none" stroke="url(#inkL)" stroke-width="2.5" stroke-linecap="round"/>
+          <path d="M46 54 C50 52, 54 52, 57 54" fill="none" stroke="#3b160c" stroke-width="2.2" stroke-linecap="round"/>
+          <path d="M63 54 C66 52, 70 52, 74 54" fill="none" stroke="#3b160c" stroke-width="2.2" stroke-linecap="round"/>
+          <path d="M60 56 C60 62, 61 66, 58 67" fill="none" stroke="url(#inkL)" stroke-width="1.9" stroke-linecap="round"/>
+          <path d="M52 74 C57 78, 63 78, 68 74" fill="none" stroke="#3b160c" stroke-width="2.3" stroke-linecap="round"/>
+          <path d="M28 112 C44 99, 76 99, 92 112" fill="none" stroke="url(#inkL)" stroke-width="3" stroke-linecap="round"/>
+        </svg>
+      `,
+      fountain: `<svg viewBox="0 0 36 36" class="w-6 h-6"><path d="M8 26h20l-2 4H10l-2-4zm3-4h14v3H11v-3zm7-14c-3 3-5 6-5 9h10c0-3-2-6-5-9z" fill="#0284c7" opacity="0.85"/><path d="M18 6c-4 0-7 3-7 6M18 6c4 0 7 3 7 6" fill="none" stroke="#38bdf8" stroke-width="1.8" stroke-linecap="round"/></svg>`,
+      bench: `<svg viewBox="0 0 36 36" class="w-6 h-6"><rect x="6" y="13" width="24" height="3" rx="1.5" fill="#92400e"/><rect x="6" y="18" width="24" height="3" rx="1.5" fill="#b45309"/><path d="M9 12v16M27 12v16M6 22h24" stroke="#78350f" stroke-width="2.2" stroke-linecap="round"/></svg>`,
+      lantern: `<svg viewBox="0 0 36 36" class="w-6 h-6"><path d="M18 5v3m-5 3h10l2 4v9l-3 4H14l-3-4v-9l2-4z" fill="#fbbf24" stroke="#b45309" stroke-width="1.8"/><circle cx="18" cy="18" r="3" fill="#fffbeb"/></svg>`,
+      rose: `<svg viewBox="0 0 36 36" class="w-6 h-6"><circle cx="18" cy="14" r="7" fill="#e11d48"/><path d="M15 13c1.5-2 4.5-2 6 0M14 16c2 2 6 2 8 0" fill="none" stroke="#ffe4e6" stroke-width="1.5" stroke-linecap="round"/><path d="M18 21v10m0-6l-5-3m5 5l5-3" stroke="#15803d" stroke-width="2.2" stroke-linecap="round"/></svg>`,
+      piano: `<svg viewBox="0 0 36 36" class="w-6 h-6"><path d="M8 12c0-3 4-5 9-5 6 0 11 4 11 10v8H8V12z" fill="#312e81"/><rect x="9" y="20" width="18" height="4" fill="#f8fafc"/><path d="M11 25v5m14-5v5" stroke="#1e1b4b" stroke-width="2.2" stroke-linecap="round"/></svg>`,
+      mirror: `<svg viewBox="0 0 36 36" class="w-6 h-6"><ellipse cx="18" cy="16" rx="8" ry="11" fill="#e0f2fe" stroke="#d97706" stroke-width="2.4"/><path d="M14 11l5 5m-3 2l4 4M13 29h10" stroke="#f59e0b" stroke-width="1.8" stroke-linecap="round"/></svg>`,
+      cello: `<svg viewBox="0 0 36 36" class="w-6 h-6"><path d="M18 6v24" stroke="#78350f" stroke-width="2.2" stroke-linecap="round"/><ellipse cx="18" cy="15" rx="4.5" ry="4" fill="#c2410c"/><ellipse cx="18" cy="22" rx="6" ry="5" fill="#9a3412"/><path d="M15 6h6" stroke="#78350f" stroke-width="2" stroke-linecap="round"/></svg>`,
+      curtain: `<svg viewBox="0 0 36 36" class="w-6 h-6"><path d="M7 7h22M9 7c0 9-2 15-2 21h7c0-6 2-12 2-21m11 0c0 9 2 15 2 21h-7c0-6-2-12-2-21" fill="#be123c" stroke="#881337" stroke-width="1.6"/></svg>`,
+      telescope: `<svg viewBox="0 0 36 36" class="w-6 h-6"><path d="M8 17l18-7 2 5-18 6-2-4z" fill="#4f46e5"/><path d="M18 17l-5 12m5-12l5 12m-5-12v12" stroke="#312e81" stroke-width="2" stroke-linecap="round"/></svg>`,
+      clock: `<svg viewBox="0 0 36 36" class="w-6 h-6"><circle cx="18" cy="18" r="10" fill="#fef3c7" stroke="#b45309" stroke-width="2.2"/><path d="M18 12v6l4 2" fill="none" stroke="#78350f" stroke-width="2" stroke-linecap="round"/></svg>`,
+      easel: `<svg viewBox="0 0 36 36" class="w-6 h-6"><path d="M18 6L9 30m9-24l9 24M11 23h14" stroke="#92400e" stroke-width="2"/><rect x="11" y="10" width="14" height="11" rx="1.5" fill="#fff1f2" stroke="#be123c" stroke-width="1.6"/><path d="M18 17.5c-2.5-1.8-3.5-3.3-2.2-4.5 1-1 2.2-.2 2.2.8 0-1 1.2-1.8 2.2-.8 1.3 1.2.3 2.7-2.2 4.5z" fill="#e11d48"/></svg>`,
+      candle: `<svg viewBox="0 0 36 36" class="w-6 h-6"><path d="M18 6c-2 2.5-2 4.5 0 6 2-1.5 2-3.5 0-6z" fill="#f59e0b"/><rect x="14" y="14" width="8" height="13" rx="1.5" fill="#fef9c3" stroke="#ca8a04" stroke-width="1.6"/><path d="M11 28h14" stroke="#b45309" stroke-width="2.2" stroke-linecap="round"/></svg>`
+    };
+
+    // =========================================================================
+    // 2. DICTIONNAIRE DES LIEUX & REPÈRES
+    // =========================================================================
+    const PLACES = {
+      verriere:   { id: 'verriere',   name: 'La Verrière',         bg: '#fce7f3', border: '#f472b6', pill: 'bg-pink-100 text-pink-900 border-pink-300', icon: '🌸' },
+      bassin:     { id: 'bassin',     name: 'Bassin aux Nymphéas', bg: '#e0f2fe', border: '#38bdf8', pill: 'bg-sky-100 text-sky-900 border-sky-300', icon: '🪷' },
+      roseraie:   { id: 'roseraie',   name: 'Roseraie Secrète',    bg: '#ffe4e6', border: '#fb7185', pill: 'bg-rose-100 text-rose-900 border-rose-300', icon: '🌹' },
+      camellia:   { id: 'camellia',   name: 'Serre aux Camélias',  bg: '#dcfce7', border: '#4ade80', pill: 'bg-emerald-100 text-emerald-900 border-emerald-300', icon: '🌿' },
+      belvedere:  { id: 'belvedere',  name: 'Le Belvédère',        bg: '#fef3c7', border: '#fbbf24', pill: 'bg-amber-100 text-amber-900 border-amber-300', icon: '✨' },
+      orangerie:  { id: 'orangerie',  name: 'Orangerie Royale',    bg: '#ffedd5', border: '#fb923c', pill: 'bg-orange-100 text-orange-900 border-orange-300', icon: '🍊' },
+      loge:       { id: 'loge',       name: 'Loge Pourpre',        bg: '#fae8ff', border: '#e879f9', pill: 'bg-fuchsia-100 text-fuchsia-900 border-fuchsia-300', icon: '🎭' },
+      foyer:      { id: 'foyer',      name: 'Grand Foyer',         bg: '#fef9c3', border: '#eab308', pill: 'bg-yellow-100 text-yellow-900 border-yellow-300', icon: '🕯️' },
+      observatoire:{ id: 'observatoire',name: 'Observatoire Céleste',bg: '#e0e7ff', border: '#818cf8', pill: 'bg-indigo-100 text-indigo-900 border-indigo-300', icon: '🔭' }
+    };
+
+    const LANDMARKS = {
+      fountain:  { label: 'la Fontaine',      svg: SVG_ART.fountain },
+      bench:     { label: 'le Banc forgé',    svg: SVG_ART.bench },
+      lantern:   { label: 'la Lanterne',      svg: SVG_ART.lantern },
+      rose:      { label: 'le Rosier',        svg: SVG_ART.rose },
+      piano:     { label: 'le Piano à queue', svg: SVG_ART.piano },
+      mirror:    { label: 'le Miroir ancien', svg: SVG_ART.mirror },
+      cello:     { label: 'le Violoncelle',   svg: SVG_ART.cello },
+      curtain:   { label: 'le Rideau',        svg: SVG_ART.curtain },
+      telescope: { label: 'le Télescope',     svg: SVG_ART.telescope },
+      clock:     { label: 'l’Horloge',        svg: SVG_ART.clock },
+      easel:     { label: 'le Chevalet',      svg: SVG_ART.easel },
+      candle:    { label: 'la Bougie',        svg: SVG_ART.candle }
+    };
+
+    const ALL_TOKENS_POOL = [
+      { id: 'B',  short: 'B.',  name: 'B. (Elle)',   role: 'lover',   artKey: 'womanB' },
+      { id: 'V',  short: 'V.',  name: 'V. (Lui)',    role: 'lover',   artKey: 'manV' },
+      { id: 'Bi', short: 'Bi.', name: 'Bibiche',     role: 'witness', artKey: 'witnessBi' },
+      { id: 'Ir', short: 'Ir.', name: 'Irène',       role: 'witness', artKey: 'witnessIr' },
+      { id: 'Mi', short: 'Mi.', name: 'Mika',        role: 'witness', artKey: 'witnessMi' },
+      { id: 'Gh', short: 'Gh.', name: 'Ghyslaine',   role: 'witness', artKey: 'witnessGh' },
+      { id: 'J',  short: 'J.',  name: 'Justine',     role: 'witness', artKey: 'witnessJ' },
+      { id: 'My', short: 'My.', name: 'Mylène',      role: 'witness', artKey: 'witnessMy' },
+      { id: 'L',  short: 'L.',  name: 'Laetitia',    role: 'witness', artKey: 'witnessL' }
+    ];
+
+    // =========================================================================
+    // 3. UTILITAIRES GÉOMÉTRIQUES POUR LE MOTEUR DE CONTRAINTES
+    // =========================================================================
+    const Geo = {
+      manhattan(p1, p2) {
+        return Math.abs(p1.r - p2.r) + Math.abs(p1.c - p2.c);
+      },
+      isOrthoAdj(p1, p2) {
+        return Math.abs(p1.r - p2.r) + Math.abs(p1.c - p2.c) === 1;
+      },
+      isDiagAdj(p1, p2) {
+        return Math.abs(p1.r - p2.r) === 1 && Math.abs(p1.c - p2.c) === 1;
+      },
+      isKingAdj(p1, p2) {
+        return Math.max(Math.abs(p1.r - p2.r), Math.abs(p1.c - p2.c)) === 1;
+      },
+      isInteriorCell(p, regions) {
+        const N = regions.length;
+        const reg = regions[p.r][p.c];
+        const dirs = [[-1,0],[1,0],[0,-1],[0,1]];
+        for (const [dr, dc] of dirs) {
+          const nr = p.r + dr, nc = p.c + dc;
+          if (nr < 0 || nr >= N || nc < 0 || nc >= N) return false;
+          if (regions[nr][nc] !== reg) return false;
+        }
+        return true;
+      },
+      areRegionsTouching(regA, regB, regions) {
+        if (regA === regB) return true;
+        const N = regions.length;
+        for (let r = 0; r < N; r++) {
+          for (let c = 0; c < N; c++) {
+            if (regions[r][c] !== regA) continue;
+            if (r > 0 && regions[r-1][c] === regB) return true;
+            if (r < N-1 && regions[r+1][c] === regB) return true;
+            if (c > 0 && regions[r][c-1] === regB) return true;
+            if (c < N-1 && regions[r][c+1] === regB) return true;
+          }
+        }
+        return false;
+      }
+    };
+
+    // =========================================================================
+    // 4. LES 3 CHAPITRES OFFICIELS 9×9 (CERTIFIÉS 1 SOLUTION UNIQUE PAR LE CSP)
+    // =========================================================================
+    // Solution de référence utilisée pour calibrer les indices topologiques :
+    // Chapitre I (9x9) :
+    // B:(0,1)[verriere], V:(1,2)[verriere], Bi:(2,5)[bassin], Ir:(3,8)[roseraie],
+    // Mi:(4,0)[orangerie], Gh:(5,3)[belvedere], J:(6,6)[loge], My:(7,4)[foyer], L:(8,7)[observatoire]
+    const CHAPTERS = [
+      {
+        id: 'chap-1',
+        badge: 'Rendez-vous I',
+        title: "Le Jardin d'Hiver",
+        subtitle: 'Grille 9×9 • Neuf salons botaniques et sept invités flânant sous la verrière.',
+        size: 9,
+        tokens: [...ALL_TOKENS_POOL],
+        regions: [
+          ['verriere','verriere','verriere','bassin','bassin','bassin','roseraie','roseraie','roseraie'],
+          ['verriere','verriere','verriere','bassin','bassin','bassin','roseraie','roseraie','roseraie'],
+          ['verriere','verriere','verriere','bassin','bassin','bassin','roseraie','roseraie','roseraie'],
+          ['orangerie','orangerie','orangerie','camellia','camellia','camellia','roseraie','roseraie','roseraie'],
+          ['orangerie','orangerie','orangerie','camellia','camellia','camellia','loge','loge','loge'],
+          ['orangerie','orangerie','orangerie','belvedere','belvedere','belvedere','loge','loge','loge'],
+          ['foyer','foyer','foyer','belvedere','belvedere','belvedere','loge','loge','loge'],
+          ['foyer','foyer','foyer','foyer','foyer','observatoire','observatoire','observatoire','observatoire'],
+          ['foyer','foyer','foyer','foyer','foyer','observatoire','observatoire','observatoire','observatoire']
+        ],
+        landmarks: {
+          '0,1': 'fountain',
+          '2,4': 'lantern',
+          '3,7': 'rose',
+          '4,1': 'bench',
+          '5,4': 'piano',
+          '6,7': 'mirror',
+          '7,3': 'candle',
+          '8,6': 'telescope'
+        },
+        clues: [
+          {
+            id: 'c1_camellia_empty',
+            text: "La Serre aux Camélias est fermée à clé : personne n'y pénètre, et les sept témoins occupent tous des lieux différents.",
+            tokens: ['B','V','Bi','Ir','Mi','Gh','J','My','L'],
+            check: (a, ch) => {
+              const witnesses = ['Bi','Ir','Mi','Gh','J','My','L'];
+              const seen = new Set();
+              for (const k of Object.keys(a)) {
+                if (ch.regions[a[k].r][a[k].c] === 'camellia') return false;
+              }
+              for (const w of witnesses) {
+                if (!a[w]) continue;
+                const reg = ch.regions[a[w].r][a[w].c];
+                if (seen.has(reg)) return false;
+                seen.add(reg);
+              }
+              return true;
+            }
+          },
+          {
+            id: 'c1_v_interior',
+            text: "V. se tient au cœur intérieur d'un salon (aucune de ses 4 cases voisines ne franchit la frontière d'un autre lieu).",
+            tokens: ['V'],
+            check: (a, ch) => Geo.isInteriorCell(a.V, ch.regions)
+          },
+          {
+            id: 'c1_b_fountain',
+            text: "B. touche orthogonalement la Fontaine contre la frontière d'un autre salon, et la distance de marche entre B. et V. est exactement de 2 pas.",
+            tokens: ['B','V'],
+            check: (a, ch) => {
+              if (!Geo.isOrthoAdj(a.B, { r: 0, c: 1 }) || Geo.manhattan(a.B, a.V) !== 2) return false;
+              const regB = ch.regions[a.B.r][a.B.c];
+              const dirs = [[-1,0],[1,0],[0,-1],[0,1]];
+              return dirs.some(([dr, dc]) => {
+                const nr = a.B.r + dr, nc = a.B.c + dc;
+                return nr >= 0 && nr < 9 && nc >= 0 && nc < 9 && ch.regions[nr][nc] !== regB;
+              });
+            }
+          },
+          {
+            id: 'c1_gh_piano',
+            text: "Ghyslaine se tient juste à côté (orthogonalement) du Piano à queue.",
+            tokens: ['Gh'],
+            check: (a) => Geo.isOrthoAdj(a.Gh, { r: 5, c: 4 })
+          },
+          {
+            id: 'c1_j_mirror',
+            text: "Justine touche orthogonalement le Miroir ancien, et se trouve à 4 pas de marche de Ghyslaine.",
+            tokens: ['J','Gh'],
+            check: (a) => Geo.isOrthoAdj(a.J, { r: 6, c: 7 }) && Geo.manhattan(a.J, a.Gh) === 4
+          },
+          {
+            id: 'c1_my_l',
+            text: "Mylène touche orthogonalement la Bougie, tandis que Laetitia est voisine orthogonale du Télescope.",
+            tokens: ['My','L'],
+            check: (a) => Geo.isOrthoAdj(a.My, { r: 7, c: 3 }) && Geo.isOrthoAdj(a.L, { r: 8, c: 6 })
+          },
+          {
+            id: 'c1_intimacy',
+            text: "Aucun témoin ne frôle B. ou V. (ni orthogonalement, ni en diagonale).",
+            tokens: ['B','V','Bi','Ir','Mi','Gh','J','My','L'],
+            check: (a) => {
+              for (const w of ['Bi','Ir','Mi','Gh','J','My','L']) {
+                if (!a[w]) continue;
+                if (a.B && Geo.isKingAdj(a[w], a.B)) return false;
+                if (a.V && Geo.isKingAdj(a[w], a.V)) return false;
+              }
+              return true;
+            }
+          }
+        ],
+        victoryStory: "Sous la haute verrière embuée, loin du bruissement des conversations de Bibiche, Irène et Laetitia, B. et V. se retrouvent enfin seuls parmi les fougères."
+      },
+      {
+        id: 'chap-2',
+        badge: 'Rendez-vous II',
+        title: "L'Opéra sous la Pluie",
+        subtitle: 'Grille 9×9 • Entre loges de velours, grand foyer doré et galeries musicales.',
+        size: 9,
+        tokens: [...ALL_TOKENS_POOL],
+        regions: [
+          ['foyer','foyer','foyer','foyer','loge','loge','loge','loge','loge'],
+          ['foyer','foyer','foyer','foyer','loge','loge','loge','loge','loge'],
+          ['bassin','bassin','bassin','orangerie','orangerie','orangerie','roseraie','roseraie','roseraie'],
+          ['bassin','bassin','bassin','orangerie','orangerie','orangerie','roseraie','roseraie','roseraie'],
+          ['bassin','bassin','bassin','camellia','camellia','camellia','roseraie','roseraie','roseraie'],
+          ['verriere','verriere','verriere','camellia','camellia','camellia','belvedere','belvedere','belvedere'],
+          ['verriere','verriere','verriere','camellia','camellia','camellia','belvedere','belvedere','belvedere'],
+          ['observatoire','observatoire','observatoire','observatoire','observatoire','belvedere','belvedere','belvedere','belvedere'],
+          ['observatoire','observatoire','observatoire','observatoire','observatoire','belvedere','belvedere','belvedere','belvedere']
+        ],
+        landmarks: {
+          '0,1': 'cello',
+          '1,6': 'curtain',
+          '2,4': 'piano',
+          '3,2': 'fountain',
+          '4,7': 'rose',
+          '5,1': 'mirror',
+          '6,6': 'lantern',
+          '7,3': 'telescope',
+          '8,8': 'clock'
+        },
+        clues: [
+          {
+            id: 'c2_camellia_empty',
+            text: "La Serre aux Camélias reste déserte durant tout l'entracte, et chacun des sept témoins occupe un salon différent.",
+            tokens: ['B','V','Bi','Ir','Mi','Gh','J','My','L'],
+            check: (a, ch) => {
+              const seen = new Set();
+              for (const k of Object.keys(a)) {
+                if (ch.regions[a[k].r][a[k].c] === 'camellia') return false;
+              }
+              for (const w of ['Bi','Ir','Mi','Gh','J','My','L']) {
+                if (!a[w]) continue;
+                const reg = ch.regions[a[w].r][a[w].c];
+                if (seen.has(reg)) return false;
+                seen.add(reg);
+              }
+              return true;
+            }
+          },
+          {
+            id: 'c2_b_v_belvedere',
+            text: "B. touche orthogonalement l'Horloge contre la frontière sud, et V. se tient à exactement 3 pas de marche de B.",
+            tokens: ['B','V'],
+            check: (a) => a.B.r === 8 && Geo.isOrthoAdj(a.B, { r: 8, c: 8 }) && Geo.manhattan(a.B, a.V) === 3
+          },
+          {
+            id: 'c2_bi_cello',
+            text: "Bibiche touche orthogonalement le Violoncelle, Irène touche orthogonalement le Rideau pourpre, et 4 pas de marche les séparent.",
+            tokens: ['Bi','Ir'],
+            check: (a) =>
+              Geo.isOrthoAdj(a.Bi, { r: 0, c: 1 }) &&
+              Geo.isOrthoAdj(a.Ir, { r: 1, c: 6 }) &&
+              Geo.manhattan(a.Bi, a.Ir) === 4
+          },
+          {
+            id: 'c2_mi_piano',
+            text: "Mika est voisin orthogonal du Piano à queue, et son salon ne touche par aucune frontière celui de Bibiche.",
+            tokens: ['Mi','Bi'],
+            check: (a, ch) => {
+              if (!Geo.isOrthoAdj(a.Mi, { r: 2, c: 4 })) return false;
+              return !Geo.areRegionsTouching(ch.regions[a.Mi.r][a.Mi.c], ch.regions[a.Bi.r][a.Bi.c], ch.regions);
+            }
+          },
+          {
+            id: 'c2_gh_fountain',
+            text: "Ghyslaine touche orthogonalement la Fontaine, et se trouve à 3 pas de marche de Mika.",
+            tokens: ['Gh','Mi'],
+            check: (a) => Geo.isOrthoAdj(a.Gh, { r: 3, c: 2 }) && Geo.manhattan(a.Gh, a.Mi) === 3
+          },
+          {
+            id: 'c2_j_rose',
+            text: "Justine touche orthogonalement le Rosier, tandis que Mylène est voisine orthogonale du Miroir ancien et se trouve à 9 pas de marche de Justine.",
+            tokens: ['J','My'],
+            check: (a) =>
+              Geo.isOrthoAdj(a.J, { r: 4, c: 7 }) &&
+              Geo.isOrthoAdj(a.My, { r: 5, c: 1 }) &&
+              Geo.manhattan(a.J, a.My) === 9
+          },
+          {
+            id: 'c2_l_telescope',
+            text: "Laetitia touche orthogonalement le Télescope et se tient à 4 pas de marche de B.",
+            tokens: ['L','B'],
+            check: (a) => Geo.isOrthoAdj(a.L, { r: 7, c: 3 }) && Geo.manhattan(a.L, a.B) === 4
+          },
+          {
+            id: 'c2_intimacy',
+            text: "Aucun témoin ne frôle B. ou V. (ni orthogonalement, ni en diagonale).",
+            tokens: ['B','V','Bi','Ir','Mi','Gh','J','My','L'],
+            check: (a) => {
+              for (const w of ['Bi','Ir','Mi','Gh','J','My','L']) {
+                if (!a[w]) continue;
+                if (a.B && Geo.isKingAdj(a[w], a.B)) return false;
+                if (a.V && Geo.isKingAdj(a[w], a.V)) return false;
+              }
+              return true;
+            }
+          }
+        ],
+        victoryStory: "Sous les dorures feutrées du Belvédère de l'Opéra, tandis que résonnent les dernières notes de violoncelle, B. et V. échangent un regard complice à l'abri des regards."
+      },
+      {
+        id: 'chap-3',
+        badge: 'Rendez-vous III',
+        title: "Minuit sur les Toits de Paris",
+        subtitle: 'Grille 9×9 • Balcons étoilés, ateliers d’artistes et coupoles nocturnes.',
+        size: 9,
+        tokens: [...ALL_TOKENS_POOL],
+        regions: [
+          ['observatoire','observatoire','observatoire','verriere','verriere','verriere','foyer','foyer','foyer'],
+          ['observatoire','observatoire','observatoire','verriere','verriere','verriere','foyer','foyer','foyer'],
+          ['observatoire','observatoire','observatoire','verriere','verriere','verriere','foyer','foyer','foyer'],
+          ['loge','loge','loge','roseraie','roseraie','roseraie','bassin','bassin','bassin'],
+          ['loge','loge','loge','roseraie','roseraie','roseraie','bassin','bassin','bassin'],
+          ['loge','loge','loge','roseraie','roseraie','roseraie','bassin','bassin','bassin'],
+          ['orangerie','orangerie','orangerie','camellia','camellia','camellia','belvedere','belvedere','belvedere'],
+          ['orangerie','orangerie','orangerie','camellia','camellia','camellia','belvedere','belvedere','belvedere'],
+          ['orangerie','orangerie','orangerie','camellia','camellia','camellia','belvedere','belvedere','belvedere']
+        ],
+        landmarks: {
+          '0,1': 'telescope',
+          '1,5': 'lantern',
+          '2,7': 'candle',
+          '3,1': 'curtain',
+          '4,4': 'easel',
+          '5,7': 'fountain',
+          '7,4': 'bench',
+          '8,7': 'clock'
+        },
+        clues: [
+          {
+            id: 'c3_camellia_empty',
+            text: "La Serre aux Camélias est plongée dans l'ombre et vide : chacun des sept témoins se trouve dans un salon distinct.",
+            tokens: ['B','V','Bi','Ir','Mi','Gh','J','My','L'],
+            check: (a, ch) => {
+              const seen = new Set();
+              for (const k of Object.keys(a)) {
+                if (ch.regions[a[k].r][a[k].c] === 'camellia') return false;
+              }
+              for (const w of ['Bi','Ir','Mi','Gh','J','My','L']) {
+                if (!a[w]) continue;
+                const reg = ch.regions[a[w].r][a[w].c];
+                if (seen.has(reg)) return false;
+                seen.add(reg);
+              }
+              return true;
+            }
+          },
+          {
+            id: 'c3_bv_easel',
+            text: "B. et V. encadrent en diagonale le Chevalet au cœur de la Roseraie Secrète (B. plus au nord que V.), sans jamais se toucher orthogonalement.",
+            tokens: ['B','V'],
+            check: (a) =>
+              Geo.isDiagAdj(a.B, { r: 4, c: 4 }) &&
+              Geo.isDiagAdj(a.V, { r: 4, c: 4 }) &&
+              a.B.r < a.V.r &&
+              !Geo.isOrthoAdj(a.B, a.V)
+          },
+          {
+            id: 'c3_bi_ir',
+            text: "Bibiche touche orthogonalement le Télescope, Irène touche orthogonalement la Lanterne, et 5 pas de marche les séparent.",
+            tokens: ['Bi','Ir'],
+            check: (a) =>
+              Geo.isOrthoAdj(a.Bi, { r: 0, c: 1 }) &&
+              Geo.isOrthoAdj(a.Ir, { r: 1, c: 5 }) &&
+              Geo.manhattan(a.Bi, a.Ir) === 5
+          },
+          {
+            id: 'c3_mi_gh',
+            text: "Mika touche orthogonalement la Bougie, Ghyslaine touche orthogonalement le Rideau, et 8 pas de marche les séparent.",
+            tokens: ['Mi','Gh'],
+            check: (a) =>
+              Geo.isOrthoAdj(a.Mi, { r: 2, c: 7 }) &&
+              Geo.isOrthoAdj(a.Gh, { r: 3, c: 1 }) &&
+              Geo.manhattan(a.Mi, a.Gh) === 8
+          },
+          {
+            id: 'c3_j_fountain',
+            text: "Justine touche orthogonalement la Fontaine et se trouve à 6 pas de marche de Ghyslaine.",
+            tokens: ['J','Gh'],
+            check: (a) => Geo.isOrthoAdj(a.J, { r: 5, c: 7 }) && Geo.manhattan(a.J, a.Gh) === 6
+          },
+          {
+            id: 'c3_my_l',
+            text: "Mylène touche orthogonalement le Banc forgé, Laetitia touche orthogonalement l'Horloge, et 6 pas de marche les séparent.",
+            tokens: ['My','L'],
+            check: (a) =>
+              Geo.isOrthoAdj(a.My, { r: 7, c: 4 }) &&
+              Geo.isOrthoAdj(a.L, { r: 8, c: 7 }) &&
+              Geo.manhattan(a.My, a.L) === 6
+          },
+          {
+            id: 'c3_intimacy',
+            text: "Aucun témoin ne frôle B. ou V. (ni orthogonalement, ni en diagonale).",
+            tokens: ['B','V','Bi','Ir','Mi','Gh','J','My','L'],
+            check: (a) => {
+              for (const w of ['Bi','Ir','Mi','Gh','J','My','L']) {
+                if (!a[w]) continue;
+                if (a.B && Geo.isKingAdj(a[w], a.B)) return false;
+                if (a.V && Geo.isKingAdj(a[w], a.V)) return false;
+              }
+              return true;
+            }
+          }
+        ],
+        victoryStory: "À minuit pile, devant le chevalet baigné de clair de lune, B. et V. se retrouvent enfin seuls face aux toits endormis de Paris."
+      }
+    ];
+
+    // =========================================================================
+    // 5. MOTEUR CSP (BACKTRACKING + MRV + PLAFOND ANTI-BLOCAGE)
+    // =========================================================================
+    const CSPSolver = {
+      buildInitialDomains(chapter, fixedPlacements = {}) {
+        const N = chapter.size;
+        const tokens = chapter.tokens.map(t => t.id);
+        const landmarkCoords = new Set(Object.keys(chapter.landmarks));
+        const usedRows = new Set();
+        const usedCols = new Set();
+
+        for (const [tok, pos] of Object.entries(fixedPlacements)) {
+          if (pos) {
+            usedRows.add(pos.r);
+            usedCols.add(pos.c);
+          }
+        }
+
+        const hasCamelliaBan = chapter.clues.some(c => c.id.includes('camellia_empty'));
+        const domains = {};
+
+        for (const tok of tokens) {
+          if (fixedPlacements[tok]) {
+            domains[tok] = [{ r: fixedPlacements[tok].r, c: fixedPlacements[tok].c }];
+            continue;
+          }
+
+          const list = [];
+          for (let r = 0; r < N; r++) {
+            if (usedRows.has(r)) continue;
+            for (let c = 0; c < N; c++) {
+              if (usedCols.has(c)) continue;
+              if (landmarkCoords.has(`${r},${c}`)) continue;
+              if (hasCamelliaBan && chapter.regions[r][c] === 'camellia') continue;
+
+              const tempAssign = { [tok]: { r, c } };
+              let ok = true;
+              for (const clue of chapter.clues) {
+                if (clue.tokens.length === 1 && clue.tokens[0] === tok) {
+                  if (!clue.check(tempAssign, chapter)) {
+                    ok = false;
+                    break;
+                  }
+                }
+              }
+              if (ok) list.push({ r, c });
+            }
+          }
+          domains[tok] = list;
+        }
+        return domains;
+      },
+
+      isPartialValid(assign, chapter) {
+        const placedIds = Object.keys(assign);
+        // Règle d'Or : si B et V sont placés, même région obligatoire
+        if (assign.B && assign.V) {
+          if (chapter.regions[assign.B.r][assign.B.c] !== chapter.regions[assign.V.r][assign.V.c]) {
+            return false;
+          }
+        }
+        // Aucun témoin dans la région de B ou V
+        const loverRegs = new Set();
+        if (assign.B) loverRegs.add(chapter.regions[assign.B.r][assign.B.c]);
+        if (assign.V) loverRegs.add(chapter.regions[assign.V.r][assign.V.c]);
+        if (loverRegs.size > 0) {
+          for (const id of placedIds) {
+            if (id === 'B' || id === 'V') continue;
+            if (loverRegs.has(chapter.regions[assign[id].r][assign[id].c])) return false;
+          }
+        }
+
+        // Vérifier chaque indice dès que tous ses jetons impliqués sont posés
+        for (const clue of chapter.clues) {
+          if (clue.tokens.every(t => assign[t] !== undefined)) {
+            if (!clue.check(assign, chapter)) return false;
+          }
+        }
+        return true;
+      },
+
+      solve(chapter, fixedPlacements = {}, limit = 2, maxNodes = 30000) {
+        const tokens = chapter.tokens.map(t => t.id);
+        const tokenIds = new Set(tokens);
+        const usedRows = new Set();
+        const usedCols = new Set();
+
+        for (const [tok, pos] of Object.entries(fixedPlacements)) {
+          if (!pos) continue;
+          if (
+            !tokenIds.has(tok) ||
+            !Number.isInteger(pos.r) ||
+            !Number.isInteger(pos.c) ||
+            pos.r < 0 ||
+            pos.r >= chapter.size ||
+            pos.c < 0 ||
+            pos.c >= chapter.size ||
+            chapter.landmarks[`${pos.r},${pos.c}`] ||
+            usedRows.has(pos.r) ||
+            usedCols.has(pos.c)
+          ) {
+            return { solutions: [], nodes: 0, timedOut: false };
+          }
+          usedRows.add(pos.r);
+          usedCols.add(pos.c);
+        }
+
+        const domains = this.buildInitialDomains(chapter, fixedPlacements);
+
+        for (const t of tokens) {
+          if (!domains[t] || domains[t].length === 0) {
+            return { solutions: [], nodes: 0, timedOut: false };
+          }
+        }
+
+        const solutions = [];
+        let nodes = 0;
+        let timedOut = false;
+
+        const backtrack = (assign, usedR, usedC) => {
+          if (solutions.length >= limit) return;
+          nodes++;
+          if (nodes > maxNodes) {
+            timedOut = true;
+            return;
+          }
+
+          const unassigned = tokens.filter(t => assign[t] === undefined);
+          if (unassigned.length === 0) {
+            solutions.push({ ...assign });
+            return;
+          }
+
+          // Heuristique MRV : choisir le jeton avec le moins de cases possibles
+          let bestTok = null;
+          let bestCandidates = null;
+          for (const tok of unassigned) {
+            const cands = domains[tok].filter(p => !usedR.has(p.r) && !usedC.has(p.c));
+            if (cands.length === 0) return;
+            if (!bestCandidates || cands.length < bestCandidates.length) {
+              bestTok = tok;
+              bestCandidates = cands;
+            }
+          }
+
+          for (const pos of bestCandidates) {
+            assign[bestTok] = pos;
+            usedR.add(pos.r);
+            usedC.add(pos.c);
+
+            if (this.isPartialValid(assign, chapter)) {
+              backtrack(assign, usedR, usedC);
+            }
+
+            delete assign[bestTok];
+            usedR.delete(pos.r);
+            usedC.delete(pos.c);
+            if (solutions.length >= limit || timedOut) return;
+          }
+        };
+
+        const initAssign = {};
+        const initR = new Set();
+        const initC = new Set();
+        for (const [k, v] of Object.entries(fixedPlacements)) {
+          if (v) {
+            initAssign[k] = v;
+            initR.add(v.r);
+            initC.add(v.c);
+          }
+        }
+
+        if (!this.isPartialValid(initAssign, chapter)) {
+          return { solutions: [], nodes: 0, timedOut: false };
+        }
+
+        backtrack(initAssign, initR, initC);
+        return { solutions, nodes, timedOut };
+      }
+    };
+
+    // =========================================================================
+    // 6. GÉNÉRATEUR PROCÉDURAL D'ÉNIGMES CERTIFIÉES UNIQUES (6×6 À 9×9)
+    // =========================================================================
+    const PuzzleGenerator = {
+      shuffle(arr) {
+        const a = [...arr];
+        for (let i = a.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [a[i], a[j]] = [a[j], a[i]];
+        }
+        return a;
+      },
+
+      generate(size = 7) {
+        const placeKeys = Object.keys(PLACES).slice(0, size);
+        const landmarkKeys = Object.keys(LANDMARKS);
+        const tokens = ALL_TOKENS_POOL.slice(0, size);
+
+        for (let attempt = 0; attempt < 90; attempt++) {
+          // 1. Découper la grille N×N en N régions connexes équilibrées
+          const regions = Array.from({ length: size }, () => Array(size).fill(null));
+          const seeds = [];
+          const allCells = [];
+          for (let r = 0; r < size; r++) {
+            for (let c = 0; c < size; c++) allCells.push({ r, c });
+          }
+          const shuffledSeeds = this.shuffle(allCells).slice(0, size);
+          shuffledSeeds.forEach((cell, idx) => {
+            regions[cell.r][cell.c] = placeKeys[idx];
+            seeds.push({ reg: placeKeys[idx], cells: [cell] });
+          });
+
+          let unassignedCount = size * size - size;
+          while (unassignedCount > 0) {
+            let progressed = false;
+            for (const s of this.shuffle(seeds)) {
+              const frontier = [];
+              for (const cell of s.cells) {
+                for (const [dr, dc] of [[-1,0],[1,0],[0,-1],[0,1]]) {
+                  const nr = cell.r + dr, nc = cell.c + dc;
+                  if (nr >= 0 && nr < size && nc >= 0 && nc < size && regions[nr][nc] === null) {
+                    frontier.push({ r: nr, c: nc });
+                  }
+                }
+              }
+              if (frontier.length > 0) {
+                const pick = frontier[Math.floor(Math.random() * frontier.length)];
+                regions[pick.r][pick.c] = s.reg;
+                s.cells.push(pick);
+                unassignedCount--;
+                progressed = true;
+              }
+            }
+            if (!progressed) break;
+          }
+
+          // 2. Tirer une permutation bijective (1 par ligne, 1 par colonne)
+          const colsPerm = this.shuffle(Array.from({ length: size }, (_, i) => i));
+          const target = {};
+          tokens.forEach((t, r) => {
+            target[t.id] = { r, c: colsPerm[r] };
+          });
+
+          // Vérifier que B et V partagent la même région et qu'aucun témoin n'y est
+          const loverReg = regions[target.B.r][target.B.c];
+          if (regions[target.V.r][target.V.c] !== loverReg) continue;
+          let witnessInLoverReg = false;
+          for (const t of tokens.slice(2)) {
+            if (regions[target[t.id].r][target[t.id].c] === loverReg) {
+              witnessInLoverReg = true;
+              break;
+            }
+          }
+          if (witnessInLoverReg) continue;
+
+          // 3. Placer un repère orthogonal adjacent à chaque silhouette (sans chevaucher les cibles)
+          const targetSet = new Set(Object.values(target).map(p => `${p.r},${p.c}`));
+          const landmarks = {};
+          const usedLmCoords = new Set();
+          const tokenLandmarks = {};
+          let lmOk = true;
+
+          for (let i = 0; i < tokens.length; i++) {
+            const tid = tokens[i].id;
+            const pos = target[tid];
+            const adj = this.shuffle([[-1,0],[1,0],[0,-1],[0,1]])
+              .map(([dr, dc]) => ({ r: pos.r + dr, c: pos.c + dc }))
+              .filter(p => p.r >= 0 && p.r < size && p.c >= 0 && p.c < size && !targetSet.has(`${p.r},${p.c}`) && !usedLmCoords.has(`${p.r},${p.c}`));
+            if (adj.length === 0) {
+              lmOk = false;
+              break;
+            }
+            const chosen = adj[0];
+            const key = `${chosen.r},${chosen.c}`;
+            const lmType = landmarkKeys[i % landmarkKeys.length];
+            landmarks[key] = lmType;
+            usedLmCoords.add(key);
+            tokenLandmarks[tid] = { coord: chosen, type: lmType };
+          }
+          if (!lmOk) continue;
+
+          // 4. Construire des indices topologiques exacts basés sur target
+          const clues = [];
+          const distBV = Geo.manhattan(target.B, target.V);
+          const lmB = tokenLandmarks.B;
+          clues.push({
+            id: 'gen_bv',
+            text: `B. touche orthogonalement ${LANDMARKS[lmB.type].label}, et V. se tient à exactement ${distBV} pas de marche de B.`,
+            tokens: ['B','V'],
+            check: (a) => Geo.isOrthoAdj(a.B, lmB.coord) && Geo.manhattan(a.B, a.V) === distBV
+          });
+
+          const witnessTokens = tokens.slice(2);
+          for (let i = 0; i < witnessTokens.length; i++) {
+            const wt = witnessTokens[i];
+            const lmW = tokenLandmarks[wt.id];
+            const prevTok = i === 0 ? tokens[0] : witnessTokens[i - 1];
+            const exactDist = Geo.manhattan(target[wt.id], target[prevTok.id]);
+            clues.push({
+              id: `gen_w_${wt.id}`,
+              text: `${wt.name} touche orthogonalement ${LANDMARKS[lmW.type].label} et se trouve à ${exactDist} pas de marche de ${prevTok.name}.`,
+              tokens: [wt.id, prevTok.id],
+              check: (a) => Geo.isOrthoAdj(a[wt.id], lmW.coord) && Geo.manhattan(a[wt.id], a[prevTok.id]) === exactDist
+            });
+          }
+
+          const candidateChapter = {
+            id: `gen-${size}-${Date.now()}`,
+            badge: `Grille Aléatoire ${size}×${size}`,
+            title: `Rendez-vous Improvisé (${size}×${size})`,
+            subtitle: `Grille ${size}×${size} générée à la volée et certifiée à solution unique par le solveur CSP.`,
+            size,
+            tokens,
+            regions,
+            landmarks,
+            clues,
+            victoryStory: `Malgré les détours imprévus à travers les ${size} salons, B. et V. ont su déjouer la curiosité des témoins pour se retrouver seuls.`
+          };
+
+          let checkRes = CSPSolver.solve(candidateChapter, {}, 2, 25000);
+
+          // Si 2 solutions subsistent (symétrie autour d'un repère), lever l'ambiguïté avec une contrainte vraie sur target
+          if (!checkRes.timedOut && checkRes.solutions.length > 1 && witnessTokens.length >= 2) {
+            const wFirst = witnessTokens[0];
+            const wLast = witnessTokens[witnessTokens.length - 1];
+            const crossDist = Geo.manhattan(target[wFirst.id], target[wLast.id]);
+            candidateChapter.clues.push({
+              id: `gen_disambig_${wFirst.id}_${wLast.id}`,
+              text: `${wFirst.name} et ${wLast.name} se tiennent à exactement ${crossDist} pas de marche l'un de l'autre.`,
+              tokens: [wFirst.id, wLast.id],
+              check: (a) => Geo.manhattan(a[wFirst.id], a[wLast.id]) === crossDist
+            });
+            checkRes = CSPSolver.solve(candidateChapter, {}, 2, 25000);
+          }
+
+          if (!checkRes.timedOut && checkRes.solutions.length === 1) {
+            return candidateChapter;
+          }
+        }
+        return null;
+      },
+
+      // Génère en boucle asynchrone (par salves non-bloquantes) jusqu'à obtenir STRICTEMENT 1 solution
+      generateGuaranteedUnique(size, onSuccess) {
+        const step = () => {
+          const gen = this.generate(size);
+          if (gen) {
+            const verify = CSPSolver.solve(gen, {}, 2, 30000);
+            if (!verify.timedOut && verify.solutions.length === 1) {
+              onSuccess(gen);
+              return;
+            }
+          }
+          setTimeout(step, 0);
+        };
+        step();
+      }
+    };
+
+    // =========================================================================
+    // 7. ÉTAT DU JEU & CONTRÔLEUR INTERACTIF
+    // =========================================================================
+    let state = {
+      chapterIndex: 0,
+      chapter: CHAPTERS[0],
+      placements: {},       // { B: {r, c}, ... }
+      manualCrosses: new Set(),
+      checkedClues: new Set(),
+      selectedToken: 'B',
+      crossMode: false,
+      autoCross: true,
+      history: [],
+      cspResult: null
+    };
+
+    function getCoordLabel(r, c) {
+      return `L${r + 1}·C${c + 1}`;
+    }
+
+    function loadChapter(idx) {
+      const ch = CHAPTERS[idx] || CHAPTERS[0];
+
+      // Vérification d'intégrité : un chapitre doit avoir STRICTEMENT 1 solution unique
+      const integrity = CSPSolver.solve(ch, {}, 2, 30000);
+      if (integrity.timedOut || integrity.solutions.length !== 1) {
+        PuzzleGenerator.generateGuaranteedUnique(ch.size || 9, (repaired) => {
+          repaired.id = ch.id;
+          repaired.badge = ch.badge;
+          repaired.title = ch.title;
+          repaired.subtitle = ch.subtitle;
+          repaired.victoryStory = ch.victoryStory;
+          CHAPTERS[idx] = repaired;
+          loadChapter(idx);
+        });
+        return;
+      }
+
+      state.chapterIndex = idx;
+      state.chapter = ch;
+      state.placements = {};
+      state.manualCrosses = new Set();
+      state.checkedClues = new Set();
+      state.selectedToken = ch.tokens[0].id;
+      state.crossMode = false;
+      state.history = [];
+
+      // Mise à jour visuelle immédiate de l'en-tête et du damier
+      document.getElementById('chapter-badge').textContent = ch.badge;
+      document.getElementById('chapter-title').textContent = ch.title;
+      document.getElementById('chapter-subtitle').textContent = ch.subtitle;
+
+      [0, 1, 2].forEach(i => {
+        const btn = document.getElementById(`chap-btn-${i}`);
+        if (!btn) return;
+        if (i === idx) {
+          btn.className = 'px-3 py-1.5 rounded-xl text-xs font-bold transition border bg-[#6b1d3a] text-white border-[#6b1d3a] shadow-sm';
+        } else {
+          btn.className = 'px-3 py-1.5 rounded-xl text-xs font-semibold transition border bg-white text-stone-700 border-rose-200 hover:bg-rose-50';
+        }
+      });
+
+      hideFeedback();
+      updateCrossModeButton();
+      renderAll();
+      runCSPProof();
+    }
+
+    function generateRandomChapter(size) {
+      const badge = document.getElementById('csp-status-badge');
+      badge.className = 'inline-flex items-center gap-1 text-[11px] font-semibold px-2.5 py-1 rounded-full bg-amber-50 text-amber-900 border border-amber-300';
+      badge.innerHTML = `<span>⏳</span><span>Synthèse ${size}×${size} (recherche solution unique)…</span>`;
+
+      PuzzleGenerator.generateGuaranteedUnique(size, (gen) => {
+        CHAPTERS[3] = gen;
+        loadChapter(3);
+        showFeedback('info', `Nouvelle grille ${size}×${size} synthétisée et certifiée à <strong>1 et 1 seule solution</strong> par le moteur CSP.`);
+      });
+    }
+
+    // =========================================================================
+    // 8. INTERACTIONS JOUEUR, OUTILS & VÉRIFICATION DE VICTOIRE
+    // =========================================================================
+    function saveHistory() {
+      state.history.push({
+        placements: JSON.parse(JSON.stringify(state.placements)),
+        manualCrosses: new Set(state.manualCrosses)
+      });
+      if (state.history.length > 50) state.history.shift();
+    }
+
+    function undoAction() {
+      if (state.history.length === 0) return;
+      const prev = state.history.pop();
+      state.placements = prev.placements;
+      state.manualCrosses = prev.manualCrosses;
+      hideFeedback();
+      renderAll();
+      runCSPProof();
+    }
+
+    function resetCurrentChapter() {
+      saveHistory();
+      state.placements = {};
+      state.manualCrosses = new Set();
+      hideFeedback();
+      renderAll();
+      runCSPProof();
+    }
+
+    function selectToken(tokId) {
+      state.crossMode = false;
+      state.selectedToken = tokId;
+      updateCrossModeButton();
+      renderPalette();
+    }
+
+    function toggleCrossMode() {
+      state.crossMode = !state.crossMode;
+      updateCrossModeButton();
+      renderPalette();
+    }
+
+    function updateCrossModeButton() {
+      const btn = document.getElementById('cross-mode-btn');
+      if (!btn) return;
+      if (state.crossMode) {
+        btn.className = 'px-2.5 py-1 rounded-xl text-xs font-bold border transition flex items-center gap-1 bg-rose-700 text-white border-rose-800 shadow-sm';
+      } else {
+        btn.className = 'px-2.5 py-1 rounded-xl text-xs font-semibold border transition flex items-center gap-1 bg-white text-stone-700 border-stone-300 hover:bg-rose-50';
+      }
+    }
+
+    function toggleAutoCross() {
+      state.autoCross = !state.autoCross;
+      const btn = document.getElementById('auto-cross-btn');
+      if (state.autoCross) {
+        btn.className = 'px-2.5 py-1 rounded-xl text-xs font-semibold border transition flex items-center gap-1 bg-rose-100 text-[#6b1d3a] border-rose-300';
+        btn.innerHTML = '<span>🪄</span><span>Auto-croix : ON</span>';
+      } else {
+        btn.className = 'px-2.5 py-1 rounded-xl text-xs font-semibold border transition flex items-center gap-1 bg-white text-stone-600 border-stone-300';
+        btn.innerHTML = '<span>🪄</span><span>Auto-croix : OFF</span>';
+      }
+      renderGrid();
+    }
+
+    function toggleManualCross(r, c) {
+      const key = `${r},${c}`;
+      if (state.chapter.landmarks[key]) return;
+      for (const pos of Object.values(state.placements)) {
+        if (pos && pos.r === r && pos.c === c) return;
+      }
+      saveHistory();
+      if (state.manualCrosses.has(key)) state.manualCrosses.delete(key);
+      else state.manualCrosses.add(key);
+      renderGrid();
+      updateCounters();
+    }
+
+    function handleCellClick(r, c) {
+      const key = `${r},${c}`;
+      if (state.chapter.landmarks[key]) {
+        showFeedback('info', `Cette case abrite ${LANDMARKS[state.chapter.landmarks[key]].label} : aucune silhouette ne peut s'y tenir.`);
+        return;
+      }
+
+      if (state.crossMode) {
+        toggleManualCross(r, c);
+        return;
+      }
+
+      // Vérifier si un pion est déjà sur cette case
+      let existingTokenOnCell = null;
+      for (const [tid, pos] of Object.entries(state.placements)) {
+        if (pos && pos.r === r && pos.c === c) {
+          existingTokenOnCell = tid;
+          break;
+        }
+      }
+
+      saveHistory();
+      state.manualCrosses.delete(key);
+
+      if (existingTokenOnCell) {
+        delete state.placements[existingTokenOnCell];
+        if (existingTokenOnCell !== state.selectedToken) {
+          state.placements[state.selectedToken] = { r, c };
+        }
+      } else {
+        state.placements[state.selectedToken] = { r, c };
+        // Sélectionner automatiquement la prochaine silhouette non encore placée
+        const nextUnplaced = state.chapter.tokens.find(t => !state.placements[t.id]);
+        if (nextUnplaced) state.selectedToken = nextUnplaced.id;
+      }
+
+      hideFeedback();
+      renderAll();
+      runCSPProof();
+
+      if (Object.keys(state.placements).length === state.chapter.tokens.length) {
+        verifyInquiry(true);
+      }
+    }
+
+    function showFeedback(type, message) {
+      const banner = document.getElementById('feedback-banner');
+      banner.classList.remove('hidden');
+      if (type === 'error') {
+        banner.className = 'mt-4 p-3.5 rounded-xl text-xs leading-relaxed border bg-rose-50 text-rose-950 border-rose-300';
+      } else if (type === 'warning') {
+        banner.className = 'mt-4 p-3.5 rounded-xl text-xs leading-relaxed border bg-amber-50 text-amber-950 border-amber-300';
+      } else {
+        banner.className = 'mt-4 p-3.5 rounded-xl text-xs leading-relaxed border bg-sky-50 text-sky-950 border-sky-300';
+      }
+      banner.innerHTML = message;
+    }
+
+    function hideFeedback() {
+      const banner = document.getElementById('feedback-banner');
+      if (banner) banner.classList.add('hidden');
+    }
+
+    function giveDeductionHint() {
+      const currentRes = CSPSolver.solve(state.chapter, state.placements, 2, 30000);
+      if (currentRes.timedOut) {
+        showFeedback('warning', '<strong>Recherche incomplète :</strong> le solveur a atteint sa limite de calcul. Réessayez ou poursuivez vos déductions manuellement.');
+        return;
+      }
+
+      if (currentRes.solutions.length === 0) {
+        // Identifier quel pion posé provoque la contradiction
+        for (const tid of Object.keys(state.placements)) {
+          const withoutOne = { ...state.placements };
+          delete withoutOne[tid];
+          const testRes = CSPSolver.solve(state.chapter, withoutOne, 1, 20000);
+          if (testRes.solutions.length > 0) {
+            const tokObj = state.chapter.tokens.find(t => t.id === tid);
+            showFeedback('error', `<strong>Contradiction détectée :</strong> la position actuelle de <strong>${tokObj ? tokObj.name : tid}</strong> bloque la résolution. Retirez ou déplacez ce pion.`);
+            return;
+          }
+          if (testRes.timedOut) {
+            showFeedback('warning', '<strong>Recherche incomplète :</strong> le solveur a atteint sa limite de calcul en testant les placements. Aucune contradiction ne peut être confirmée.');
+            return;
+          }
+        }
+        showFeedback('error', '<strong>Contradiction multiple :</strong> plusieurs silhouettes actuelles sont incompatibles avec les indices du carnet.');
+        return;
+      }
+
+      const sol = currentRes.solutions[0];
+      const nextTok = state.chapter.tokens.find(t => !state.placements[t.id]);
+      if (!nextTok) {
+        verifyInquiry(false);
+        return;
+      }
+
+      const targetPos = sol[nextTok.id];
+      const regName = PLACES[state.chapter.regions[targetPos.r][targetPos.c]].name;
+      const hintText = currentRes.solutions.length === 1
+        ? `<strong>Piste logique (MRV) :</strong> d'après les contraintes, <strong>${nextTok.name}</strong> doit se placer dans <strong>${regName}</strong> en <strong>${getCoordLabel(targetPos.r, targetPos.c)}</strong>.`
+        : `<strong>Exemple compatible :</strong> parmi au moins 2 solutions, <strong>${nextTok.name}</strong> peut se placer dans <strong>${regName}</strong> en <strong>${getCoordLabel(targetPos.r, targetPos.c)}</strong>.`;
+      showFeedback(
+        'info',
+        hintText
+      );
+    }
+
+    function verifyInquiry(silentIfIncomplete = false) {
+      const total = state.chapter.tokens.length;
+      const placedCount = Object.keys(state.placements).length;
+
+      if (placedCount < total) {
+        if (!silentIfIncomplete) {
+          showFeedback('warning', `Il reste encore <strong>${total - placedCount} silhouette(s)</strong> à placer sur le damier avant de sceller le rendez-vous.`);
+        }
+        return;
+      }
+
+      // Vérifier lignes et colonnes uniques
+      const rows = new Set();
+      const cols = new Set();
+      for (const [tid, pos] of Object.entries(state.placements)) {
+        if (rows.has(pos.r) || cols.has(pos.c)) {
+          showFeedback('error', '<strong>Règle d’alignement :</strong> deux silhouettes partagent la même ligne ou la même colonne.');
+          return;
+        }
+        rows.add(pos.r);
+        cols.add(pos.c);
+      }
+
+      // Vérifier le rendez-vous secret de B. et V.
+      const regB = state.chapter.regions[state.placements.B.r][state.placements.B.c];
+      const regV = state.chapter.regions[state.placements.V.r][state.placements.V.c];
+      if (regB !== regV) {
+        showFeedback('error', '<strong>Rendez-vous manqué :</strong> B. et V. doivent se retrouver dans le <strong>même lieu coloré</strong>.');
+        return;
+      }
+
+      for (const tok of state.chapter.tokens) {
+        if (tok.id === 'B' || tok.id === 'V') continue;
+        const pos = state.placements[tok.id];
+        if (state.chapter.regions[pos.r][pos.c] === regB) {
+          showFeedback('error', `<strong>Regard indiscret :</strong> ${tok.name} se trouve dans ${PLACES[regB].name} avec B. et V. !`);
+          return;
+        }
+      }
+
+      // Vérifier tous les indices du carnet
+      for (let i = 0; i < state.chapter.clues.length; i++) {
+        const clue = state.chapter.clues[i];
+        if (!clue.check(state.placements, state.chapter)) {
+          showFeedback('error', `<strong>Indice n°${i + 1} non respecté :</strong> « ${clue.text} »`);
+          return;
+        }
+      }
+
+      // Victoire !
+      openVictoryModal(PLACES[regB]);
+    }
+
+    function openVictoryModal(place) {
+      document.getElementById('victory-portrait-b').innerHTML = SVG_ART.womanB;
+      document.getElementById('victory-portrait-v').innerHTML = SVG_ART.manV;
+      document.getElementById('victory-place-label').textContent = `${place.icon} Lieu des retrouvailles : ${place.name}`;
+      document.getElementById('victory-story').textContent = `« ${state.chapter.victoryStory} »`;
+      document.getElementById('victory-modal').classList.remove('hidden');
+      spawnPetals();
+    }
+
+    function closeVictoryModal() {
+      document.getElementById('victory-modal').classList.add('hidden');
+    }
+
+    function nextChapter() {
+      closeVictoryModal();
+      const nextIdx = state.chapterIndex >= 2 ? 0 : (state.chapterIndex + 1) % 3;
+      loadChapter(nextIdx);
+    }
+
+    function spawnPetals() {
+      const container = document.getElementById('petals-container');
+      container.innerHTML = '';
+      const symbols = ['🌸', '🌹', '✨', '♥'];
+      for (let i = 0; i < 24; i++) {
+        const el = document.createElement('span');
+        el.className = 'petal text-lg';
+        el.textContent = symbols[i % symbols.length];
+        el.style.left = `${Math.random() * 96}vw`;
+        el.style.animationDuration = `${3.2 + Math.random() * 2.5}s`;
+        el.style.animationDelay = `${Math.random() * 0.9}s`;
+        container.appendChild(el);
+      }
+      setTimeout(() => { container.innerHTML = ''; }, 6500);
+    }
+
+    function toggleErgonomicsGuide() {
+      const panel = document.getElementById('ergonomics-panel');
+      panel.classList.toggle('hidden');
+    }
+
+    // =========================================================================
+    // 9. RENDU VISUEL DU DAMIER, DE LA PALETTE, DES INDICES & PREUVE CSP
+    // =========================================================================
+    function renderAll() {
+      renderPalette();
+      renderGrid();
+      renderPlacesLegend();
+      renderClues();
+      updateCounters();
+    }
+
+    function updateCounters() {
+      const total = state.chapter.tokens.length;
+      const placed = Object.keys(state.placements).length;
+      const counterEl = document.getElementById('placed-counter');
+      if (counterEl) counterEl.textContent = `${placed} / ${total} placés`;
+      const undoBtn = document.getElementById('undo-btn');
+      if (undoBtn) undoBtn.disabled = state.history.length === 0;
+    }
+
+    function renderPalette() {
+      const container = document.getElementById('tokens-palette');
+      if (!container) return;
+      container.innerHTML = '';
+
+      state.chapter.tokens.forEach(tok => {
+        const isPlaced = Boolean(state.placements[tok.id]);
+        const isSelected = !state.crossMode && state.selectedToken === tok.id;
+
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.onclick = () => selectToken(tok.id);
+        btn.className = [
+          'flex items-center gap-2 p-2 rounded-xl border text-left transition relative',
+          isSelected
+            ? 'bg-rose-100/90 border-[#6b1d3a] ring-2 ring-[#6b1d3a]/30 shadow-sm'
+            : isPlaced
+              ? 'bg-stone-100/80 border-stone-200 opacity-65 hover:opacity-100'
+              : 'bg-white border-rose-200 hover:bg-rose-50/70'
+        ].join(' ');
+
+        let avatarHtml = '';
+        if (tok.id === 'B') {
+          avatarHtml = `<div class="w-9 h-9 rounded-full overflow-hidden border-2 border-[#6b1d3a] shrink-0 bg-[#fcf8f3] shadow-xs">${SVG_ART.womanB}</div>`;
+        } else if (tok.id === 'V') {
+          avatarHtml = `<div class="w-9 h-9 rounded-full overflow-hidden border-2 border-[#c67d63] shrink-0 bg-[#fcf8f3] shadow-xs">${SVG_ART.manV}</div>`;
+        } else {
+          const portrait = SVG_ART[tok.artKey] || `<span class="font-serif-romance font-bold text-xs">${tok.short}</span>`;
+          avatarHtml = `<div class="w-9 h-9 rounded-full overflow-hidden border border-rose-300 shrink-0 bg-[#fcf8f3] relative shadow-xs" title="${tok.name}">${portrait}</div>`;
+        }
+
+        const coordText = isPlaced ? getCoordLabel(state.placements[tok.id].r, state.placements[tok.id].c) : 'À placer';
+        btn.innerHTML = `
+          ${avatarHtml}
+          <div class="min-w-0 flex-1">
+            <div class="text-xs font-bold text-[#491126] truncate">${tok.name}</div>
+            <div class="text-[10px] ${isPlaced ? 'text-emerald-700 font-semibold' : 'text-stone-500'}">${coordText}</div>
+          </div>
+        `;
+        container.appendChild(btn);
+      });
+    }
+
+    function getAutoCrossedCells() {
+      const autoSet = new Set();
+      if (!state.autoCross) return autoSet;
+
+      const N = state.chapter.size;
+      const usedRows = new Set();
+      const usedCols = new Set();
+      for (const pos of Object.values(state.placements)) {
+        if (pos) {
+          usedRows.add(pos.r);
+          usedCols.add(pos.c);
+        }
+      }
+
+      for (let r = 0; r < N; r++) {
+        for (let c = 0; c < N; c++) {
+          if (usedRows.has(r) || usedCols.has(c)) {
+            autoSet.add(`${r},${c}`);
+          }
+        }
+      }
+
+      // Si B et V sont dans le même lieu, verrouiller le reste de ce lieu aux témoins
+      if (state.placements.B && state.placements.V) {
+        const regB = state.chapter.regions[state.placements.B.r][state.placements.B.c];
+        const regV = state.chapter.regions[state.placements.V.r][state.placements.V.c];
+        if (regB === regV) {
+          for (let r = 0; r < N; r++) {
+            for (let c = 0; c < N; c++) {
+              if (state.chapter.regions[r][c] === regB) {
+                autoSet.add(`${r},${c}`);
+              }
+            }
+          }
+        }
+      }
+      return autoSet;
+    }
+
+    function renderGrid() {
+      const wrapper = document.getElementById('grid-wrapper');
+      if (!wrapper) return;
+      const N = state.chapter.size;
+      const regions = state.chapter.regions;
+      const autoCrosses = getAutoCrossedCells();
+
+      // Index inversé des silhouettes posées
+      const tokenAtCell = {};
+      for (const tok of state.chapter.tokens) {
+        const pos = state.placements[tok.id];
+        if (pos) tokenAtCell[`${pos.r},${pos.c}`] = tok;
+      }
+
+      const loversReunited =
+        state.placements.B &&
+        state.placements.V &&
+        regions[state.placements.B.r][state.placements.B.c] === regions[state.placements.V.r][state.placements.V.c];
+      const reunitedReg = loversReunited ? regions[state.placements.B.r][state.placements.B.c] : null;
+
+      const gridEl = document.createElement('div');
+      gridEl.className = 'grid w-full rounded-2xl overflow-hidden border-2 border-[#6b1d3a]/40 shadow-inner bg-white';
+      gridEl.style.gridTemplateColumns = `repeat(${N}, minmax(0, 1fr))`;
+
+      for (let r = 0; r < N; r++) {
+        for (let c = 0; c < N; c++) {
+          const key = `${r},${c}`;
+          const regId = regions[r][c];
+          const place = PLACES[regId] || PLACES.verriere;
+          const tok = tokenAtCell[key];
+          const lmKey = state.chapter.landmarks[key];
+          const isManualX = state.manualCrosses.has(key);
+          const isAutoX = !tok && !lmKey && autoCrosses.has(key);
+
+          // Bordures épaisses entre salons distincts
+          const topBorder = r === 0 || regions[r - 1][c] !== regId ? '2px solid rgba(107,29,58,0.42)' : '1px solid rgba(107,29,58,0.12)';
+          const leftBorder = c === 0 || regions[r][c - 1] !== regId ? '2px solid rgba(107,29,58,0.42)' : '1px solid rgba(107,29,58,0.12)';
+          const rightBorder = c === N - 1 ? '2px solid rgba(107,29,58,0.42)' : 'none';
+          const bottomBorder = r === N - 1 ? '2px solid rgba(107,29,58,0.42)' : 'none';
+
+          const cellBtn = document.createElement('button');
+          cellBtn.type = 'button';
+          cellBtn.className = [
+            'board-cell flex items-center justify-center focus:outline-none',
+            isAutoX ? 'auto-crossed' : '',
+            reunitedReg === regId ? 'lovers-reunited-glow' : ''
+          ].join(' ');
+          cellBtn.style.backgroundColor = place.bg;
+          cellBtn.style.borderTop = topBorder;
+          cellBtn.style.borderLeft = leftBorder;
+          cellBtn.style.borderRight = rightBorder;
+          cellBtn.style.borderBottom = bottomBorder;
+
+          cellBtn.onmouseenter = () => {
+            const coordBadge = document.getElementById('hovered-coord-badge');
+            if (coordBadge) coordBadge.textContent = getCoordLabel(r, c);
+          };
+          cellBtn.onclick = () => handleCellClick(r, c);
+          cellBtn.oncontextmenu = (e) => {
+            e.preventDefault();
+            toggleManualCross(r, c);
+          };
+
+          // Coordonnée discrète en coin
+          let inner = `<span class="absolute top-0.5 left-1 text-[9px] font-mono text-stone-600/60 pointer-events-none">${r + 1},${c + 1}</span>`;
+
+          if (tok) {
+            if (tok.id === 'B') {
+              inner += `<div class="token-animate w-[78%] h-[78%] rounded-full overflow-hidden border-2 border-[#6b1d3a] shadow-md bg-[#fcf8f3]">${SVG_ART.womanB}</div>`;
+            } else if (tok.id === 'V') {
+              inner += `<div class="token-animate w-[78%] h-[78%] rounded-full overflow-hidden border-2 border-[#c67d63] shadow-md bg-[#fcf8f3]">${SVG_ART.manV}</div>`;
+            } else {
+              const wSvg = SVG_ART[tok.artKey] || tok.short;
+              inner += `
+                <div class="token-animate w-[76%] h-[76%] rounded-full overflow-hidden border-2 border-[#6b1d3a]/75 shadow-sm bg-[#fcf8f3] relative" title="${tok.name}">
+                  ${wSvg}
+                  <span class="absolute bottom-0 inset-x-0 bg-[#491126]/85 text-[#fcf8f3] text-[8px] sm:text-[9px] font-bold leading-tight text-center py-[0.5px]">${tok.short}</span>
+                </div>`;
+            }
+          } else if (lmKey && LANDMARKS[lmKey]) {
+            inner += `<div class="flex flex-col items-center justify-center opacity-90 pointer-events-none" title="${LANDMARKS[lmKey].label}">${LANDMARKS[lmKey].svg}</div>`;
+          } else if (isManualX) {
+            inner += `<span class="text-rose-700/85 font-bold text-sm sm:text-base pointer-events-none">✕</span>`;
+          } else if (isAutoX) {
+            inner += `<span class="text-stone-400/70 text-[11px] pointer-events-none">·</span>`;
+          }
+
+          cellBtn.innerHTML = inner;
+          gridEl.appendChild(cellBtn);
+        }
+      }
+
+      wrapper.innerHTML = '';
+      wrapper.appendChild(gridEl);
+    }
+
+    function renderPlacesLegend() {
+      const container = document.getElementById('places-legend');
+      if (!container) return;
+      const usedRegs = new Set();
+      for (const row of state.chapter.regions) {
+        for (const rId of row) usedRegs.add(rId);
+      }
+
+      container.innerHTML = '';
+      usedRegs.forEach(rId => {
+        const p = PLACES[rId];
+        if (!p) return;
+        const badge = document.createElement('span');
+        badge.className = `inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold border ${p.pill}`;
+        badge.innerHTML = `<span>${p.icon}</span><span>${p.name}</span>`;
+        container.appendChild(badge);
+      });
+    }
+
+    function renderClues() {
+      const list = document.getElementById('clues-list');
+      if (!list) return;
+      list.innerHTML = '';
+
+      state.chapter.clues.forEach((clue, idx) => {
+        const isChecked = state.checkedClues.has(clue.id);
+        const li = document.createElement('li');
+        li.onclick = () => {
+          if (state.checkedClues.has(clue.id)) state.checkedClues.delete(clue.id);
+          else state.checkedClues.add(clue.id);
+          renderClues();
+        };
+        li.className = [
+          'p-3 rounded-xl border text-xs leading-relaxed cursor-pointer transition flex items-start gap-2.5 select-none',
+          isChecked
+            ? 'bg-emerald-50/60 border-emerald-200 text-stone-500 line-through'
+            : 'bg-white/95 border-rose-200/80 text-stone-800 hover:border-rose-400 hover:bg-rose-50/40'
+        ].join(' ');
+
+        li.innerHTML = `
+          <span class="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0 mt-0.5 ${
+            isChecked ? 'bg-emerald-600 text-white' : 'bg-rose-100 text-[#6b1d3a]'
+          }">${isChecked ? '✓' : idx + 1}</span>
+          <span>${clue.text}</span>
+        `;
+        list.appendChild(li);
+      });
+    }
+
+    function runCSPProof() {
+      const badge = document.getElementById('csp-status-badge');
+      if (!badge) return;
+
+      const t0 = performance.now();
+      const res = CSPSolver.solve(state.chapter, state.placements, 2, 30000);
+      const dt = (performance.now() - t0).toFixed(1);
+      state.cspResult = res;
+
+      const hasPlacements = Object.keys(state.placements).length > 0;
+      if (res.timedOut) {
+        badge.className = 'inline-flex items-center gap-1 text-[11px] font-semibold px-2.5 py-1 rounded-full bg-amber-50 text-amber-900 border border-amber-300';
+        badge.innerHTML = `<span>⏳</span><span>Résultat indéterminé : limite de recherche atteinte (${dt} ms)</span>`;
+      } else if (res.solutions.length === 1) {
+        badge.className = 'inline-flex items-center gap-1 text-[11px] font-semibold px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-900 border border-emerald-300';
+        badge.innerHTML = hasPlacements
+          ? `<span>✅</span><span>Piste valide : 1 solution (${dt} ms)</span>`
+          : `<span>✅</span><span>Preuve CSP : 1 solution (${dt} ms)</span>`;
+      } else if (res.solutions.length === 0) {
+        badge.className = 'inline-flex items-center gap-1 text-[11px] font-semibold px-2.5 py-1 rounded-full bg-rose-50 text-rose-900 border border-rose-300';
+        badge.innerHTML = `<span>⚠️</span><span>Piste bloquée : 0 solution (${dt} ms)</span>`;
+      } else {
+        badge.className = 'inline-flex items-center gap-1 text-[11px] font-semibold px-2.5 py-1 rounded-full bg-amber-50 text-amber-900 border border-amber-300';
+        badge.innerHTML = `<span>ℹ️</span><span>Preuve CSP : ${res.solutions.length}+ solutions (${dt} ms)</span>`;
+      }
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === '?' || (e.shiftKey && e.key === '/')) {
+        e.preventDefault();
+        toggleErgonomicsGuide();
+      } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') {
+        e.preventDefault();
+        undoAction();
+      } else if (e.key === 'Escape') {
+        closeVictoryModal();
+      }
+    });
+
+    window.addEventListener('DOMContentLoaded', () => {
+      loadChapter(0);
+    });
+  </script>
+</body>
+</html>

@@ -42,6 +42,12 @@
       width: 100%;
       max-width: 720px;
       margin: 0 auto;
+      box-sizing: border-box;
+      padding: 6px;
+      border: 1px solid rgba(198, 125, 99, 0.55);
+      border-radius: 1.25rem;
+      background: linear-gradient(145deg, #f8eddd 0%, #fffdfa 48%, #f5e8d9 100%);
+      box-shadow: 0 14px 28px -20px rgba(73, 17, 38, 0.5), inset 0 1px rgba(255, 255, 255, 0.9);
       user-select: none;
       -webkit-user-select: none;
     }
@@ -54,9 +60,15 @@
     }
 
     .board-cell:hover {
-      filter: brightness(0.975);
+      filter: brightness(1.025) saturate(1.04);
       z-index: 10;
-      box-shadow: inset 0 0 0 2px rgba(107, 29, 58, 0.45);
+      box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.9), inset 0 0 0 4px rgba(107, 29, 58, 0.4);
+    }
+
+    .board-cell:focus-visible {
+      outline: 2px solid #6b1d3a;
+      outline-offset: -3px;
+      z-index: 20;
     }
 
     .auto-crossed {
@@ -2192,10 +2204,10 @@
           const isAutoX = !tok && !lmKey && autoCrosses.has(key);
 
           // Bordures épaisses entre salons distincts
-          const topBorder = r === 0 || regions[r - 1][c] !== regId ? '2px solid rgba(107,29,58,0.42)' : '1px solid rgba(107,29,58,0.12)';
-          const leftBorder = c === 0 || regions[r][c - 1] !== regId ? '2px solid rgba(107,29,58,0.42)' : '1px solid rgba(107,29,58,0.12)';
-          const rightBorder = c === N - 1 ? '2px solid rgba(107,29,58,0.42)' : 'none';
-          const bottomBorder = r === N - 1 ? '2px solid rgba(107,29,58,0.42)' : 'none';
+          const topBorder = r === 0 || regions[r - 1][c] !== regId ? '2px solid rgba(107,29,58,0.52)' : '1px solid rgba(107,29,58,0.14)';
+          const leftBorder = c === 0 || regions[r][c - 1] !== regId ? '2px solid rgba(107,29,58,0.52)' : '1px solid rgba(107,29,58,0.14)';
+          const rightBorder = c === N - 1 ? '2px solid rgba(107,29,58,0.52)' : 'none';
+          const bottomBorder = r === N - 1 ? '2px solid rgba(107,29,58,0.52)' : 'none';
 
           const cellBtn = document.createElement('button');
           cellBtn.type = 'button';

@@ -98,6 +98,10 @@ courant. Les indices du carnet peuvent être cochés indépendamment pour suivre
 vos déductions ; leur coche est une annotation personnelle, pas une validation
 automatique de l'indice.
 
+Le panneau **Ergonomie & Aide** (`?`) donne aussi des exemples pour distinguer
+les voisinages orthogonal, diagonal et du roi, comprendre les distances à pas de
+marche, les directions, les frontières de lieux et les combinaisons ET/OU/NON.
+
 ## Chapitres
 
 Les trois chapitres prédéfinis utilisent une grille de 9 × 9 et les neuf
@@ -207,7 +211,8 @@ Après la première exécution réussie, le site est accessible à l'adresse :
 Il n'y a pas de commande de build, de gestionnaire de paquets ni de suite de
 tests automatisés dans le dépôt. Après une modification, vérifiez manuellement :
 
-1. que chacun des trois chapitres se charge ;
+1. que chacun des trois chapitres se charge et que le solveur y certifie une
+   solution unique ;
 2. que les placements et les croisements de lignes/colonnes mettent à jour le
    badge CSP ;
 3. que l'annulation, les croix et le raccourci d'aide fonctionnent ;

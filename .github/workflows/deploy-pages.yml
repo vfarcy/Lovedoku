@@ -29,9 +29,24 @@ jobs:
         uses: actions/configure-pages@v5
 
       - name: Prepare static site
+        env:
+          BUILD_NUMBER: ${{ github.run_number }}
         run: |
           mkdir site
           cp index.html site/index.html
+          BUILD_INFO="Build #${BUILD_NUMBER} — généré le $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
+          export BUILD_INFO
+          python3 - <<'PY'
+          from pathlib import Path
+          import os
+
+          page = Path("site/index.html")
+          html = page.read_text(encoding="utf-8")
+          marker = "Build local"
+          if html.count(marker) != 1:
+              raise SystemExit(f"Expected one build marker in {page}, found {html.count(marker)}")
+          page.write_text(html.replace(marker, os.environ["BUILD_INFO"]), encoding="utf-8")
+          PY
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3

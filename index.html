@@ -233,6 +233,9 @@
             <span id="csp-status-badge" class="inline-flex items-center gap-1 text-[11px] font-semibold px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-900 border border-emerald-300">
               <span>✅</span><span>Preuve CSP : 1 solution</span>
             </span>
+            <span id="difficulty-badge" title="Estimation heuristique fondée sur l'effort du solveur et la composition logique des indices." class="text-[11px] font-semibold px-2.5 py-1 rounded-full bg-violet-50 text-violet-900 border border-violet-300">
+              Difficulté estimée
+            </span>
           </div>
           <h2 id="chapter-title" class="font-serif-romance text-2xl font-bold text-[#491126] mt-1">
             Le Jardin d'Hiver
@@ -358,6 +361,12 @@
       </div>
     </div>
   </div>
+
+  <footer class="mt-auto border-t border-rose-200/70 bg-white/70 px-4 py-3 text-center">
+    <p class="text-[11px] font-medium text-stone-500">
+      N° de build : <span>Build local</span>
+    </p>
+  </footer>
 
   <script>
     // =========================================================================
@@ -682,6 +691,19 @@
       { id: 'L',  short: 'L.',  name: 'Laetitia',    role: 'witness', artKey: 'witnessL' }
     ];
 
+    const ALL_TOKEN_IDS = ALL_TOKENS_POOL.map(token => token.id);
+    const WITNESS_IDS = ALL_TOKENS_POOL.filter(token => token.role === 'witness').map(token => token.id);
+    const roomAndCamelliaRule = () => Rule.and(
+      Rule.outsideRegion(ALL_TOKEN_IDS, 'camellia'),
+      Rule.allDifferentRegions(WITNESS_IDS)
+    );
+    const intimacyRule = () => Rule.and(
+      ...WITNESS_IDS.map(witness => Rule.not(Rule.or(
+        Rule.adjacent(witness, Rule.token('B'), 'king'),
+        Rule.adjacent(witness, Rule.token('V'), 'king')
+      )))
+    );
+
     // =========================================================================
     // 3. UTILITAIRES GÉOMÉTRIQUES POUR LE MOTEUR DE CONTRAINTES
     // =========================================================================
@@ -725,13 +747,215 @@
       }
     };
 
+    const Rule = {
+      and(...rules) { return { type: 'and', rules }; },
+      or(...rules) { return { type: 'or', rules }; },
+      not(rule) { return { type: 'not', rule }; },
+      token(id) { return { token: id }; },
+      position(r, c) { return { position: { r, c } }; },
+      landmark(r, c) { return { landmark: { r, c } }; },
+      adjacent(token, target, mode = 'orthogonal') {
+        return { type: 'adjacent', first: this.token(token), second: target, mode };
+      },
+      distance(first, second, value) { return { type: 'distance', first, second, value }; },
+      direction(first, second, direction) { return { type: 'direction', first, second, direction }; },
+      interior(token) { return { type: 'interior', token }; },
+      inRegion(token, region) { return { type: 'inRegion', token, region }; },
+      outsideRegion(tokens, region) { return { type: 'outsideRegion', tokens, region }; },
+      onEdge(token, edge) { return { type: 'onEdge', token, edge }; },
+      onCorner(token) { return { type: 'onCorner', token }; },
+      atRegionBoundary(token) { return { type: 'atRegionBoundary', token }; },
+      regionRelation(first, second, relation) { return { type: 'regionRelation', first, second, relation }; },
+      sameRow(first, second) { return { type: 'sameRow', first, second }; },
+      sameColumn(first, second) { return { type: 'sameColumn', first, second }; },
+      allDifferentRegions(tokens) { return { type: 'allDifferentRegions', tokens }; }
+    };
+
+    const ClueRules = {
+      uniqueTokens(tokens) {
+        return [...new Set(tokens.filter(Boolean))];
+      },
+
+      tokens(rule) {
+        switch (rule.type) {
+          case 'and':
+          case 'or':
+            return this.uniqueTokens(rule.rules.flatMap(child => this.tokens(child)));
+          case 'not':
+            return this.uniqueTokens(this.tokens(rule.rule));
+          case 'adjacent':
+            return this.uniqueTokens([rule.first, rule.second]
+              .filter(endpoint => endpoint && endpoint.token)
+              .map(endpoint => endpoint.token));
+          case 'distance':
+          case 'direction':
+          case 'regionRelation':
+          case 'sameRow':
+          case 'sameColumn':
+            return this.uniqueTokens([rule.first, rule.second]);
+          case 'interior':
+          case 'inRegion':
+          case 'onEdge':
+          case 'onCorner':
+          case 'atRegionBoundary':
+            return this.uniqueTokens([rule.token]);
+          case 'allDifferentRegions':
+          case 'outsideRegion':
+            return this.uniqueTokens([...rule.tokens]);
+          default:
+            throw new Error(`Unknown clue rule type: ${rule.type}`);
+        }
+      },
+
+      endpointPosition(endpoint, assign, chapter) {
+        if (endpoint.token) return assign[endpoint.token] || null;
+        if (endpoint.position) return endpoint.position;
+        if (endpoint.landmark) {
+          const { r, c } = endpoint.landmark;
+          return chapter.landmarks[`${r},${c}`] ? endpoint.landmark : null;
+        }
+        return null;
+      },
+
+      evaluate(rule, assign, chapter) {
+        switch (rule.type) {
+          case 'and': {
+            let incomplete = false;
+            for (const child of rule.rules) {
+              const result = this.evaluate(child, assign, chapter);
+              if (result === false) return false;
+              if (result === null) incomplete = true;
+            }
+            return incomplete ? null : true;
+          }
+          case 'or': {
+            let incomplete = false;
+            for (const child of rule.rules) {
+              const result = this.evaluate(child, assign, chapter);
+              if (result === true) return true;
+              if (result === null) incomplete = true;
+            }
+            return incomplete ? null : false;
+          }
+          case 'not': {
+            const result = this.evaluate(rule.rule, assign, chapter);
+            return result === null ? null : !result;
+          }
+          case 'adjacent': {
+            const first = this.endpointPosition(rule.first, assign, chapter);
+            const second = this.endpointPosition(rule.second, assign, chapter);
+            if (!first || !second) return null;
+            if (rule.mode === 'orthogonal') return Geo.isOrthoAdj(first, second);
+            if (rule.mode === 'diagonal') return Geo.isDiagAdj(first, second);
+            if (rule.mode === 'king') return Geo.isKingAdj(first, second);
+            throw new Error(`Unknown adjacency mode: ${rule.mode}`);
+          }
+          case 'distance': {
+            if (!assign[rule.first] || !assign[rule.second]) return null;
+            return Geo.manhattan(assign[rule.first], assign[rule.second]) === rule.value;
+          }
+          case 'direction': {
+            const first = assign[rule.first];
+            const second = assign[rule.second];
+            if (!first || !second) return null;
+            if (rule.direction === 'north') return first.r < second.r;
+            if (rule.direction === 'south') return first.r > second.r;
+            if (rule.direction === 'east') return first.c > second.c;
+            if (rule.direction === 'west') return first.c < second.c;
+            throw new Error(`Unknown direction: ${rule.direction}`);
+          }
+          case 'interior': {
+            if (!assign[rule.token]) return null;
+            return Geo.isInteriorCell(assign[rule.token], chapter.regions);
+          }
+          case 'inRegion': {
+            if (!assign[rule.token]) return null;
+            const { r, c } = assign[rule.token];
+            return chapter.regions[r][c] === rule.region;
+          }
+          case 'outsideRegion': {
+            let incomplete = false;
+            for (const token of rule.tokens) {
+              const pos = assign[token];
+              if (!pos) {
+                incomplete = true;
+                continue;
+              }
+              if (chapter.regions[pos.r][pos.c] === rule.region) return false;
+            }
+            return incomplete ? null : true;
+          }
+          case 'onEdge': {
+            if (!assign[rule.token]) return null;
+            const { r, c } = assign[rule.token];
+            const last = chapter.size - 1;
+            if (rule.edge === 'north') return r === 0;
+            if (rule.edge === 'east') return c === last;
+            if (rule.edge === 'south') return r === last;
+            if (rule.edge === 'west') return c === 0;
+            if (rule.edge === 'any') return r === 0 || c === 0 || r === last || c === last;
+            throw new Error(`Unknown board edge: ${rule.edge}`);
+          }
+          case 'onCorner': {
+            if (!assign[rule.token]) return null;
+            const { r, c } = assign[rule.token];
+            const last = chapter.size - 1;
+            return (r === 0 || r === last) && (c === 0 || c === last);
+          }
+          case 'atRegionBoundary': {
+            if (!assign[rule.token]) return null;
+            const { r, c } = assign[rule.token];
+            const region = chapter.regions[r][c];
+            const directions = [[-1, 0], [1, 0], [0, -1], [0, 1]];
+            return directions.some(([dr, dc]) => {
+              const nr = r + dr, nc = c + dc;
+              return nr >= 0 && nr < chapter.size && nc >= 0 && nc < chapter.size &&
+                chapter.regions[nr][nc] !== region;
+            });
+          }
+          case 'regionRelation': {
+            if (!assign[rule.first] || !assign[rule.second]) return null;
+            const first = assign[rule.first], second = assign[rule.second];
+            const firstRegion = chapter.regions[first.r][first.c];
+            const secondRegion = chapter.regions[second.r][second.c];
+            if (rule.relation === 'same') return firstRegion === secondRegion;
+            if (rule.relation === 'different') return firstRegion !== secondRegion;
+            if (rule.relation === 'touching') {
+              return Geo.areRegionsTouching(firstRegion, secondRegion, chapter.regions);
+            }
+            throw new Error(`Unknown region relation: ${rule.relation}`);
+          }
+          case 'sameRow':
+          case 'sameColumn': {
+            if (!assign[rule.first] || !assign[rule.second]) return null;
+            return rule.type === 'sameRow'
+              ? assign[rule.first].r === assign[rule.second].r
+              : assign[rule.first].c === assign[rule.second].c;
+          }
+          case 'allDifferentRegions': {
+            const seen = new Set();
+            let incomplete = false;
+            for (const token of rule.tokens) {
+              const pos = assign[token];
+              if (!pos) {
+                incomplete = true;
+                continue;
+              }
+              const region = chapter.regions[pos.r][pos.c];
+              if (seen.has(region)) return false;
+              seen.add(region);
+            }
+            return incomplete ? null : true;
+          }
+          default:
+            throw new Error(`Unknown clue rule type: ${rule.type}`);
+        }
+      }
+    };
+
     // =========================================================================
-    // 4. LES 3 CHAPITRES OFFICIELS 9×9 (CERTIFIÉS 1 SOLUTION UNIQUE PAR LE CSP)
+    // 4. LES 3 SCÉNARIOS PRÉDÉFINIS 9×9
     // =========================================================================
-    // Solution de référence utilisée pour calibrer les indices topologiques :
-    // Chapitre I (9x9) :
-    // B:(0,1)[verriere], V:(1,2)[verriere], Bi:(2,5)[bassin], Ir:(3,8)[roseraie],
-    // Mi:(4,0)[orangerie], Gh:(5,3)[belvedere], J:(6,6)[loge], My:(7,4)[foyer], L:(8,7)[observatoire]
     const CHAPTERS = [
       {
         id: 'chap-1',
@@ -765,72 +989,47 @@
           {
             id: 'c1_camellia_empty',
             text: "La Serre aux Camélias est fermée à clé : personne n'y pénètre, et les sept témoins occupent tous des lieux différents.",
-            tokens: ['B','V','Bi','Ir','Mi','Gh','J','My','L'],
-            check: (a, ch) => {
-              const witnesses = ['Bi','Ir','Mi','Gh','J','My','L'];
-              const seen = new Set();
-              for (const k of Object.keys(a)) {
-                if (ch.regions[a[k].r][a[k].c] === 'camellia') return false;
-              }
-              for (const w of witnesses) {
-                if (!a[w]) continue;
-                const reg = ch.regions[a[w].r][a[w].c];
-                if (seen.has(reg)) return false;
-                seen.add(reg);
-              }
-              return true;
-            }
+            rule: roomAndCamelliaRule()
           },
           {
             id: 'c1_v_interior',
             text: "V. se tient au cœur intérieur d'un salon (aucune de ses 4 cases voisines ne franchit la frontière d'un autre lieu).",
-            tokens: ['V'],
-            check: (a, ch) => Geo.isInteriorCell(a.V, ch.regions)
+            rule: Rule.interior('V')
           },
           {
             id: 'c1_b_fountain',
             text: "B. touche orthogonalement la Fontaine contre la frontière d'un autre salon, et la distance de marche entre B. et V. est exactement de 2 pas.",
-            tokens: ['B','V'],
-            check: (a, ch) => {
-              if (!Geo.isOrthoAdj(a.B, { r: 0, c: 1 }) || Geo.manhattan(a.B, a.V) !== 2) return false;
-              const regB = ch.regions[a.B.r][a.B.c];
-              const dirs = [[-1,0],[1,0],[0,-1],[0,1]];
-              return dirs.some(([dr, dc]) => {
-                const nr = a.B.r + dr, nc = a.B.c + dc;
-                return nr >= 0 && nr < 9 && nc >= 0 && nc < 9 && ch.regions[nr][nc] !== regB;
-              });
-            }
+            rule: Rule.and(
+              Rule.adjacent('B', Rule.landmark(0, 1)),
+              Rule.atRegionBoundary('B'),
+              Rule.distance('B', 'V', 2)
+            )
           },
           {
             id: 'c1_gh_piano',
             text: "Ghyslaine se tient juste à côté (orthogonalement) du Piano à queue.",
-            tokens: ['Gh'],
-            check: (a) => Geo.isOrthoAdj(a.Gh, { r: 5, c: 4 })
+            rule: Rule.adjacent('Gh', Rule.landmark(5, 4))
           },
           {
             id: 'c1_j_mirror',
             text: "Justine touche orthogonalement le Miroir ancien, et se trouve à 4 pas de marche de Ghyslaine.",
-            tokens: ['J','Gh'],
-            check: (a) => Geo.isOrthoAdj(a.J, { r: 6, c: 7 }) && Geo.manhattan(a.J, a.Gh) === 4
+            rule: Rule.and(
+              Rule.adjacent('J', Rule.landmark(6, 7)),
+              Rule.distance('J', 'Gh', 4)
+            )
           },
           {
             id: 'c1_my_l',
             text: "Mylène touche orthogonalement la Bougie, tandis que Laetitia est voisine orthogonale du Télescope.",
-            tokens: ['My','L'],
-            check: (a) => Geo.isOrthoAdj(a.My, { r: 7, c: 3 }) && Geo.isOrthoAdj(a.L, { r: 8, c: 6 })
+            rule: Rule.and(
+              Rule.adjacent('My', Rule.landmark(7, 3)),
+              Rule.adjacent('L', Rule.landmark(8, 6))
+            )
           },
           {
             id: 'c1_intimacy',
             text: "Aucun témoin ne frôle B. ou V. (ni orthogonalement, ni en diagonale).",
-            tokens: ['B','V','Bi','Ir','Mi','Gh','J','My','L'],
-            check: (a) => {
-              for (const w of ['Bi','Ir','Mi','Gh','J','My','L']) {
-                if (!a[w]) continue;
-                if (a.B && Geo.isKingAdj(a[w], a.B)) return false;
-                if (a.V && Geo.isKingAdj(a[w], a.V)) return false;
-              }
-              return true;
-            }
+            rule: intimacyRule()
           }
         ],
         victoryStory: "Sous la haute verrière embuée, loin du bruissement des conversations de Bibiche, Irène et Laetitia, B. et V. se retrouvent enfin seuls parmi les fougères."
@@ -868,78 +1067,63 @@
           {
             id: 'c2_camellia_empty',
             text: "La Serre aux Camélias reste déserte durant tout l'entracte, et chacun des sept témoins occupe un salon différent.",
-            tokens: ['B','V','Bi','Ir','Mi','Gh','J','My','L'],
-            check: (a, ch) => {
-              const seen = new Set();
-              for (const k of Object.keys(a)) {
-                if (ch.regions[a[k].r][a[k].c] === 'camellia') return false;
-              }
-              for (const w of ['Bi','Ir','Mi','Gh','J','My','L']) {
-                if (!a[w]) continue;
-                const reg = ch.regions[a[w].r][a[w].c];
-                if (seen.has(reg)) return false;
-                seen.add(reg);
-              }
-              return true;
-            }
+            rule: roomAndCamelliaRule()
           },
           {
             id: 'c2_b_v_belvedere',
             text: "B. touche orthogonalement l'Horloge contre la frontière sud, et V. se tient à exactement 3 pas de marche de B.",
-            tokens: ['B','V'],
-            check: (a) => a.B.r === 8 && Geo.isOrthoAdj(a.B, { r: 8, c: 8 }) && Geo.manhattan(a.B, a.V) === 3
+            rule: Rule.and(
+              Rule.onEdge('B', 'south'),
+              Rule.adjacent('B', Rule.landmark(8, 8)),
+              Rule.distance('B', 'V', 3)
+            )
           },
           {
             id: 'c2_bi_cello',
             text: "Bibiche touche orthogonalement le Violoncelle, Irène touche orthogonalement le Rideau pourpre, et 4 pas de marche les séparent.",
-            tokens: ['Bi','Ir'],
-            check: (a) =>
-              Geo.isOrthoAdj(a.Bi, { r: 0, c: 1 }) &&
-              Geo.isOrthoAdj(a.Ir, { r: 1, c: 6 }) &&
-              Geo.manhattan(a.Bi, a.Ir) === 4
+            rule: Rule.and(
+              Rule.adjacent('Bi', Rule.landmark(0, 1)),
+              Rule.adjacent('Ir', Rule.landmark(1, 6)),
+              Rule.distance('Bi', 'Ir', 4)
+            )
           },
           {
             id: 'c2_mi_piano',
             text: "Mika est voisin orthogonal du Piano à queue, et son salon ne touche par aucune frontière celui de Bibiche.",
-            tokens: ['Mi','Bi'],
-            check: (a, ch) => {
-              if (!Geo.isOrthoAdj(a.Mi, { r: 2, c: 4 })) return false;
-              return !Geo.areRegionsTouching(ch.regions[a.Mi.r][a.Mi.c], ch.regions[a.Bi.r][a.Bi.c], ch.regions);
-            }
+            rule: Rule.and(
+              Rule.adjacent('Mi', Rule.landmark(2, 4)),
+              Rule.not(Rule.regionRelation('Mi', 'Bi', 'touching'))
+            )
           },
           {
             id: 'c2_gh_fountain',
             text: "Ghyslaine touche orthogonalement la Fontaine, et se trouve à 3 pas de marche de Mika.",
-            tokens: ['Gh','Mi'],
-            check: (a) => Geo.isOrthoAdj(a.Gh, { r: 3, c: 2 }) && Geo.manhattan(a.Gh, a.Mi) === 3
+            rule: Rule.and(
+              Rule.adjacent('Gh', Rule.landmark(3, 2)),
+              Rule.distance('Gh', 'Mi', 3)
+            )
           },
           {
             id: 'c2_j_rose',
             text: "Justine touche orthogonalement le Rosier, tandis que Mylène est voisine orthogonale du Miroir ancien et se trouve à 9 pas de marche de Justine.",
-            tokens: ['J','My'],
-            check: (a) =>
-              Geo.isOrthoAdj(a.J, { r: 4, c: 7 }) &&
-              Geo.isOrthoAdj(a.My, { r: 5, c: 1 }) &&
-              Geo.manhattan(a.J, a.My) === 9
+            rule: Rule.and(
+              Rule.adjacent('J', Rule.landmark(4, 7)),
+              Rule.adjacent('My', Rule.landmark(5, 1)),
+              Rule.distance('J', 'My', 9)
+            )
           },
           {
             id: 'c2_l_telescope',
             text: "Laetitia touche orthogonalement le Télescope et se tient à 4 pas de marche de B.",
-            tokens: ['L','B'],
-            check: (a) => Geo.isOrthoAdj(a.L, { r: 7, c: 3 }) && Geo.manhattan(a.L, a.B) === 4
+            rule: Rule.and(
+              Rule.adjacent('L', Rule.landmark(7, 3)),
+              Rule.distance('L', 'B', 4)
+            )
           },
           {
             id: 'c2_intimacy',
             text: "Aucun témoin ne frôle B. ou V. (ni orthogonalement, ni en diagonale).",
-            tokens: ['B','V','Bi','Ir','Mi','Gh','J','My','L'],
-            check: (a) => {
-              for (const w of ['Bi','Ir','Mi','Gh','J','My','L']) {
-                if (!a[w]) continue;
-                if (a.B && Geo.isKingAdj(a[w], a.B)) return false;
-                if (a.V && Geo.isKingAdj(a[w], a.V)) return false;
-              }
-              return true;
-            }
+            rule: intimacyRule()
           }
         ],
         victoryStory: "Sous les dorures feutrées du Belvédère de l'Opéra, tandis que résonnent les dernières notes de violoncelle, B. et V. échangent un regard complice à l'abri des regards."
@@ -976,76 +1160,57 @@
           {
             id: 'c3_camellia_empty',
             text: "La Serre aux Camélias est plongée dans l'ombre et vide : chacun des sept témoins se trouve dans un salon distinct.",
-            tokens: ['B','V','Bi','Ir','Mi','Gh','J','My','L'],
-            check: (a, ch) => {
-              const seen = new Set();
-              for (const k of Object.keys(a)) {
-                if (ch.regions[a[k].r][a[k].c] === 'camellia') return false;
-              }
-              for (const w of ['Bi','Ir','Mi','Gh','J','My','L']) {
-                if (!a[w]) continue;
-                const reg = ch.regions[a[w].r][a[w].c];
-                if (seen.has(reg)) return false;
-                seen.add(reg);
-              }
-              return true;
-            }
+            rule: roomAndCamelliaRule()
           },
           {
             id: 'c3_bv_easel',
             text: "B. et V. encadrent en diagonale le Chevalet au cœur de la Roseraie Secrète (B. plus au nord que V.), sans jamais se toucher orthogonalement.",
-            tokens: ['B','V'],
-            check: (a) =>
-              Geo.isDiagAdj(a.B, { r: 4, c: 4 }) &&
-              Geo.isDiagAdj(a.V, { r: 4, c: 4 }) &&
-              a.B.r < a.V.r &&
-              !Geo.isOrthoAdj(a.B, a.V)
+            rule: Rule.and(
+              Rule.adjacent('B', Rule.landmark(4, 4), 'diagonal'),
+              Rule.adjacent('V', Rule.landmark(4, 4), 'diagonal'),
+              Rule.direction('B', 'V', 'north'),
+              Rule.not(Rule.adjacent('B', Rule.token('V')))
+            )
           },
           {
             id: 'c3_bi_ir',
             text: "Bibiche touche orthogonalement le Télescope, Irène touche orthogonalement la Lanterne, et 5 pas de marche les séparent.",
-            tokens: ['Bi','Ir'],
-            check: (a) =>
-              Geo.isOrthoAdj(a.Bi, { r: 0, c: 1 }) &&
-              Geo.isOrthoAdj(a.Ir, { r: 1, c: 5 }) &&
-              Geo.manhattan(a.Bi, a.Ir) === 5
+            rule: Rule.and(
+              Rule.adjacent('Bi', Rule.landmark(0, 1)),
+              Rule.adjacent('Ir', Rule.landmark(1, 5)),
+              Rule.distance('Bi', 'Ir', 5)
+            )
           },
           {
             id: 'c3_mi_gh',
             text: "Mika touche orthogonalement la Bougie, Ghyslaine touche orthogonalement le Rideau, et 8 pas de marche les séparent.",
-            tokens: ['Mi','Gh'],
-            check: (a) =>
-              Geo.isOrthoAdj(a.Mi, { r: 2, c: 7 }) &&
-              Geo.isOrthoAdj(a.Gh, { r: 3, c: 1 }) &&
-              Geo.manhattan(a.Mi, a.Gh) === 8
+            rule: Rule.and(
+              Rule.adjacent('Mi', Rule.landmark(2, 7)),
+              Rule.adjacent('Gh', Rule.landmark(3, 1)),
+              Rule.distance('Mi', 'Gh', 8)
+            )
           },
           {
             id: 'c3_j_fountain',
             text: "Justine touche orthogonalement la Fontaine et se trouve à 6 pas de marche de Ghyslaine.",
-            tokens: ['J','Gh'],
-            check: (a) => Geo.isOrthoAdj(a.J, { r: 5, c: 7 }) && Geo.manhattan(a.J, a.Gh) === 6
+            rule: Rule.and(
+              Rule.adjacent('J', Rule.landmark(5, 7)),
+              Rule.distance('J', 'Gh', 6)
+            )
           },
           {
             id: 'c3_my_l',
             text: "Mylène touche orthogonalement le Banc forgé, Laetitia touche orthogonalement l'Horloge, et 6 pas de marche les séparent.",
-            tokens: ['My','L'],
-            check: (a) =>
-              Geo.isOrthoAdj(a.My, { r: 7, c: 4 }) &&
-              Geo.isOrthoAdj(a.L, { r: 8, c: 7 }) &&
-              Geo.manhattan(a.My, a.L) === 6
+            rule: Rule.and(
+              Rule.adjacent('My', Rule.landmark(7, 4)),
+              Rule.adjacent('L', Rule.landmark(8, 7)),
+              Rule.distance('My', 'L', 6)
+            )
           },
           {
             id: 'c3_intimacy',
             text: "Aucun témoin ne frôle B. ou V. (ni orthogonalement, ni en diagonale).",
-            tokens: ['B','V','Bi','Ir','Mi','Gh','J','My','L'],
-            check: (a) => {
-              for (const w of ['Bi','Ir','Mi','Gh','J','My','L']) {
-                if (!a[w]) continue;
-                if (a.B && Geo.isKingAdj(a[w], a.B)) return false;
-                if (a.V && Geo.isKingAdj(a[w], a.V)) return false;
-              }
-              return true;
-            }
+            rule: intimacyRule()
           }
         ],
         victoryStory: "À minuit pile, devant le chevalet baigné de clair de lune, B. et V. se retrouvent enfin seuls face aux toits endormis de Paris."
@@ -1070,7 +1235,6 @@
           }
         }
 
-        const hasCamelliaBan = chapter.clues.some(c => c.id.includes('camellia_empty'));
         const domains = {};
 
         for (const tok of tokens) {
@@ -1085,13 +1249,13 @@
             for (let c = 0; c < N; c++) {
               if (usedCols.has(c)) continue;
               if (landmarkCoords.has(`${r},${c}`)) continue;
-              if (hasCamelliaBan && chapter.regions[r][c] === 'camellia') continue;
 
               const tempAssign = { [tok]: { r, c } };
               let ok = true;
               for (const clue of chapter.clues) {
-                if (clue.tokens.length === 1 && clue.tokens[0] === tok) {
-                  if (!clue.check(tempAssign, chapter)) {
+                const clueTokens = ClueRules.tokens(clue.rule);
+                if (clueTokens.length === 1 && clueTokens[0] === tok) {
+                  if (ClueRules.evaluate(clue.rule, tempAssign, chapter) === false) {
                     ok = false;
                     break;
                   }
@@ -1124,11 +1288,9 @@
           }
         }
 
-        // Vérifier chaque indice dès que tous ses jetons impliqués sont posés
+        // Tri-state evaluation lets compound rules reject impossible partial assignments.
         for (const clue of chapter.clues) {
-          if (clue.tokens.every(t => assign[t] !== undefined)) {
-            if (!clue.check(assign, chapter)) return false;
-          }
+          if (ClueRules.evaluate(clue.rule, assign, chapter) === false) return false;
         }
         return true;
       },
@@ -1233,6 +1395,28 @@
       }
     };
 
+    const PuzzleDifficulty = {
+      ruleWeight(rule) {
+        if (rule.type === 'and') return rule.rules.reduce((sum, child) => sum + this.ruleWeight(child), 0);
+        if (rule.type === 'or') {
+          return 30 + rule.rules.reduce((sum, child) => sum + this.ruleWeight(child), 0);
+        }
+        if (rule.type === 'not') return 10 + this.ruleWeight(rule.rule);
+        return 0;
+      },
+
+      estimate(chapter, proof) {
+        if (proof.timedOut || proof.solutions.length !== 1) return null;
+        const score = proof.nodes + chapter.clues.reduce(
+          (sum, clue) => sum + this.ruleWeight(clue.rule),
+          0
+        );
+        if (score <= 300) return { label: 'Accessible', score };
+        if (score <= 1200) return { label: 'Intermédiaire', score };
+        return { label: 'Soutenue', score };
+      }
+    };
+
     // =========================================================================
     // 6. GÉNÉRATEUR PROCÉDURAL D'ÉNIGMES CERTIFIÉES UNIQUES (6×6 À 9×9)
     // =========================================================================
@@ -1334,15 +1518,27 @@
           }
           if (!lmOk) continue;
 
-          // 4. Construire des indices topologiques exacts basés sur target
+          // 4. Construire des indices topologiques basés sur target
           const clues = [];
           const distBV = Geo.manhattan(target.B, target.V);
           const lmB = tokenLandmarks.B;
+          const cornerToken = tokens.find(({ id }) => {
+            const pos = target[id];
+            const last = size - 1;
+            return (pos.r === 0 || pos.r === last) && (pos.c === 0 || pos.c === last);
+          });
+          const rendezvousPositionRule = cornerToken && ['B', 'V'].includes(cornerToken.id)
+            ? Rule.onCorner(cornerToken.id)
+            : Rule.adjacent('B', Rule.landmark(lmB.coord.r, lmB.coord.c));
           clues.push({
             id: 'gen_bv',
-            text: `B. touche orthogonalement ${LANDMARKS[lmB.type].label}, et V. se tient à exactement ${distBV} pas de marche de B.`,
-            tokens: ['B','V'],
-            check: (a) => Geo.isOrthoAdj(a.B, lmB.coord) && Geo.manhattan(a.B, a.V) === distBV
+            text: cornerToken && ['B', 'V'].includes(cornerToken.id)
+              ? `${cornerToken.short} se trouve dans un coin, et les deux silhouettes sont à ${distBV} pas de marche.`
+              : `B. touche orthogonalement ${LANDMARKS[lmB.type].label}, et V. se tient à exactement ${distBV} pas de marche de B.`,
+            rule: Rule.and(
+              rendezvousPositionRule,
+              Rule.distance('B', 'V', distBV)
+            )
           });
 
           const witnessTokens = tokens.slice(2);
@@ -1350,12 +1546,62 @@
             const wt = witnessTokens[i];
             const lmW = tokenLandmarks[wt.id];
             const prevTok = i === 0 ? tokens[0] : witnessTokens[i - 1];
-            const exactDist = Geo.manhattan(target[wt.id], target[prevTok.id]);
+            const position = target[wt.id];
+            const previousPosition = target[prevTok.id];
+            const exactDist = Geo.manhattan(position, previousPosition);
+            const usesCornerClue = cornerToken && wt.id === cornerToken.id;
+            const edge = position.r === 0 ? 'north'
+              : position.c === size - 1 ? 'east'
+              : position.r === size - 1 ? 'south'
+              : position.c === 0 ? 'west'
+              : null;
+            const usesEdgeClue = !usesCornerClue && edge && (i % 2 === 0 || position.r === size - 1);
+            const alternateEdge = { north: 'east', east: 'south', south: 'west', west: 'north' }[edge];
+            const edgeLabels = { north: 'nord', east: 'est', south: 'sud', west: 'ouest' };
+            const locationRule = usesCornerClue
+              ? Rule.onCorner(wt.id)
+              : usesEdgeClue
+                ? Rule.or(Rule.onEdge(wt.id, edge), Rule.onEdge(wt.id, alternateEdge))
+                : Rule.adjacent(wt.id, Rule.landmark(lmW.coord.r, lmW.coord.c));
+            const locationText = usesCornerClue
+              ? 'se trouve dans un coin'
+              : usesEdgeClue
+                ? `se trouve sur le bord ${edgeLabels[edge]} ou ${edgeLabels[alternateEdge]}`
+                : `touche orthogonalement ${LANDMARKS[lmW.type].label}`;
+
+            let relationRule;
+            let relationText;
+            if (i % 3 === 0) {
+              const witnessRegion = regions[position.r][position.c];
+              const previousRegion = regions[previousPosition.r][previousPosition.c];
+              if (witnessRegion === previousRegion) {
+                relationRule = Rule.regionRelation(wt.id, prevTok.id, 'same');
+                relationText = `le salon de ${wt.name} est le même que celui de ${prevTok.name}`;
+              } else if (Geo.areRegionsTouching(witnessRegion, previousRegion, regions)) {
+                relationRule = Rule.regionRelation(wt.id, prevTok.id, 'touching');
+                relationText = `les salons de ${wt.name} et ${prevTok.name} partagent une frontière`;
+              } else {
+                relationRule = Rule.not(Rule.regionRelation(wt.id, prevTok.id, 'touching'));
+                relationText = `les salons de ${wt.name} et ${prevTok.name} ne se touchent pas`;
+              }
+            } else if (i % 3 === 1) {
+              const rowDelta = position.r - previousPosition.r;
+              const columnDelta = position.c - previousPosition.c;
+              const direction = Math.abs(rowDelta) >= Math.abs(columnDelta)
+                ? rowDelta < 0 ? 'north' : 'south'
+                : columnDelta < 0 ? 'west' : 'east';
+              const directionText = { north: 'nord', east: 'est', south: 'sud', west: 'ouest' }[direction];
+              relationRule = Rule.direction(wt.id, prevTok.id, direction);
+              relationText = `${wt.name} se trouve au ${directionText} de ${prevTok.name}`;
+            } else {
+              relationRule = Rule.distance(wt.id, prevTok.id, exactDist);
+              relationText = `${wt.name} se trouve à ${exactDist} pas de marche de ${prevTok.name}`;
+            }
+
             clues.push({
               id: `gen_w_${wt.id}`,
-              text: `${wt.name} touche orthogonalement ${LANDMARKS[lmW.type].label} et se trouve à ${exactDist} pas de marche de ${prevTok.name}.`,
-              tokens: [wt.id, prevTok.id],
-              check: (a) => Geo.isOrthoAdj(a[wt.id], lmW.coord) && Geo.manhattan(a[wt.id], a[prevTok.id]) === exactDist
+              text: `${wt.name} ${locationText}, et ${relationText}.`,
+              rule: Rule.and(locationRule, relationRule)
             });
           }
 
@@ -1382,8 +1628,7 @@
             candidateChapter.clues.push({
               id: `gen_disambig_${wFirst.id}_${wLast.id}`,
               text: `${wFirst.name} et ${wLast.name} se tiennent à exactement ${crossDist} pas de marche l'un de l'autre.`,
-              tokens: [wFirst.id, wLast.id],
-              check: (a) => Geo.manhattan(a[wFirst.id], a[wLast.id]) === crossDist
+              rule: Rule.distance(wFirst.id, wLast.id, crossDist)
             });
             checkRes = CSPSolver.solve(candidateChapter, {}, 2, 25000);
           }
@@ -1432,12 +1677,27 @@
       return `L${r + 1}·C${c + 1}`;
     }
 
+    function updateDifficultyBadge(chapter, proof) {
+      const badge = document.getElementById('difficulty-badge');
+      if (!badge) return;
+      const estimate = PuzzleDifficulty.estimate(chapter, proof);
+      if (!estimate) {
+        badge.textContent = 'Difficulté non estimée';
+        badge.title = 'Le solveur n’a pas pu établir une solution unique dans sa limite de calcul.';
+        return;
+      }
+      badge.textContent = `Difficulté estimée : ${estimate.label}`;
+      badge.title = `Score heuristique : ${estimate.score}. Il combine les nœuds explorés par le CSP et les opérateurs OU/NON ; il ne certifie pas la difficulté humaine.`;
+    }
+
     function loadChapter(idx) {
       const ch = CHAPTERS[idx] || CHAPTERS[0];
 
       // Vérification d'intégrité : un chapitre doit avoir STRICTEMENT 1 solution unique
       const integrity = CSPSolver.solve(ch, {}, 2, 30000);
       if (integrity.timedOut || integrity.solutions.length !== 1) {
+        const difficultyBadge = document.getElementById('difficulty-badge');
+        if (difficultyBadge) difficultyBadge.textContent = 'Difficulté : recalcul en cours…';
         PuzzleGenerator.generateGuaranteedUnique(ch.size || 9, (repaired) => {
           repaired.id = ch.id;
           repaired.badge = ch.badge;
@@ -1458,6 +1718,7 @@
       state.selectedToken = ch.tokens[0].id;
       state.crossMode = false;
       state.history = [];
+      updateDifficultyBadge(ch, integrity);
 
       // Mise à jour visuelle immédiate de l'en-tête et du damier
       document.getElementById('chapter-badge').textContent = ch.badge;
@@ -1722,7 +1983,7 @@
       // Vérifier tous les indices du carnet
       for (let i = 0; i < state.chapter.clues.length; i++) {
         const clue = state.chapter.clues[i];
-        if (!clue.check(state.placements, state.chapter)) {
+        if (ClueRules.evaluate(clue.rule, state.placements, state.chapter) !== true) {
           showFeedback('error', `<strong>Indice n°${i + 1} non respecté :</strong> « ${clue.text} »`);
           return;
         }

@@ -25,11 +25,13 @@ navigateur.
 - Neuf silhouettes illustrées en SVG et plusieurs lieux colorés.
 - Indices topologiques : voisinage orthogonal ou diagonal et distance de
   Manhattan.
+- Indices déclaratifs combinables avec ET, OU et NON.
+- Relations de direction, de bordure, de coin et entre lieux.
 - Croix d'exclusion manuelles et hachures automatiques.
 - Annulation des actions, suivi visuel des indices et vérification de la
   solution.
 - Solveur par contraintes avec recherche en profondeur, heuristique MRV et
-  limite de calcul.
+  limite de calcul, accompagné d'une estimation indicative de complexité.
 - Interface responsive en français, utilisable à la souris et sur écran tactile.
 
 ## Démarrer le jeu
@@ -117,6 +119,11 @@ et de silhouettes utilisées. La grille associe des lieux, une permutation de
 placements cible, des repères adjacents et des indices calculés à partir de
 cette cible.
 
+Les indices générés varient les relations utilisées : proximité de repères,
+bordure ou coin, direction, distance et relations entre les lieux. Des règles
+ET/OU/NON peuvent aussi être utilisées pour exprimer des combinaisons sans
+remplacer la vérification d'unicité.
+
 Le solveur vérifie les grilles générées et le générateur ne présente une grille
 que lorsqu'il en a certifié une solution unique dans la limite de calcul prévue.
 La génération peut prendre un moment. Une grille aléatoire remplace le chapitre
@@ -124,6 +131,28 @@ courant pour la session ; elle n'est pas enregistrée après le rechargement de 
 page.
 
 ## Solveur et indices
+
+Les indices sont décrits par un arbre de règles déclaratif. Les opérateurs
+**ET**, **OU** et **NON** peuvent combiner des prédicats tels que voisinage
+orthogonal/diagonal, distance de Manhattan, direction relative, bordure ou coin
+de grille, frontière entre lieux et relations entre lieux. La même évaluation
+sert au solveur et à la validation finale ; les règles composées peuvent donc
+être vérifiées aussi pendant les placements partiels.
+
+Les indices se définissent dans `index.html` avec les constructeurs `Rule`.
+Par exemple, une proximité et une distance peuvent être réunies ainsi :
+
+```js
+Rule.and(
+  Rule.adjacent('J', Rule.landmark(6, 7)),
+  Rule.distance('J', 'Gh', 4)
+)
+```
+
+Les expressions peuvent aussi être imbriquées ; par exemple,
+`Rule.not(Rule.or(regleA, regleB))` signifie que ni `regleA` ni `regleB` ne
+doit être vraie. Il s'agit d'une API d'édition dans le code, pas d'un éditeur
+visuel accessible dans l'interface.
 
 Le solveur CSP (*Constraint Satisfaction Problem*) complète les placements
 déjà posés en respectant les contraintes de lignes et colonnes, les règles de
@@ -140,6 +169,14 @@ Le bouton **Indice logique (CSP)** fournit une position compatible avec les
 contraintes restantes. Si plusieurs solutions sont déjà trouvées, la position
 est présentée comme un exemple, et non comme une obligation. Si la recherche
 est interrompue par sa limite, l'indice signale que le résultat est incomplet.
+
+Le badge **Difficulté estimée** est une indication heuristique fondée sur les
+nœuds explorés par le solveur et la présence d'opérateurs OU/NON. Il décrit la
+complexité de recherche calculée, pas une difficulté humaine certifiée : une
+grille unique peut encore nécessiter une supposition pour un joueur.
+Son score additionne les nœuds CSP explorés, 30 points par opérateur OU et
+10 points par opérateur NON ; les seuils servent uniquement à produire les
+libellés Accessible, Intermédiaire et Soutenue.
 
 ## Technologies et architecture
 
@@ -158,8 +195,9 @@ dans la page. Un rechargement réinitialise la partie.
 Le workflow [deploy-pages.yml](.github/workflows/deploy-pages.yml) publie
 automatiquement `index.html` sur GitHub Pages à chaque push vers `main`. Il peut
 aussi être lancé manuellement depuis l'onglet **Actions** avec
-**Deploy GitHub Pages**. Aucun build n'est nécessaire : le workflow prépare un
-artifact contenant uniquement la page du jeu.
+**Deploy GitHub Pages**. Le workflow prépare l'artifact en copiant la page et
+en y inscrivant le numéro du run ainsi que la date et l'heure de génération en
+UTC. Cette information apparaît en bas de la page publiée.
 
 Après la première exécution réussie, le site est accessible à l'adresse :
 <https://vfarcy.github.io/Lovedoku/>.
@@ -173,7 +211,9 @@ tests automatisés dans le dépôt. Après une modification, vérifiez manuellem
 2. que les placements et les croisements de lignes/colonnes mettent à jour le
    badge CSP ;
 3. que l'annulation, les croix et le raccourci d'aide fonctionnent ;
-4. que le bouton d'indice distingue une possibilité d'une position forcée ;
-5. que les générateurs 6 × 6 et 9 × 9 produisent une grille utilisable ;
-6. que la validation n'affiche la victoire qu'après respect de toutes les
+4. que les indices ET/OU/NON et les règles de direction, bordure, coin et lieu
+   sont évalués de la même façon par le solveur et la validation finale ;
+5. que le bouton d'indice distingue une possibilité d'une position forcée ;
+6. que les générateurs 6 × 6 et 9 × 9 produisent une grille utilisable ;
+7. que la validation n'affiche la victoire qu'après respect de toutes les
    règles et de tous les indices.

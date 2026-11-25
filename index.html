@@ -299,7 +299,7 @@
           <p><strong>ET :</strong> toutes les conditions doivent être vraies.</p>
           <p><strong>OU :</strong> au moins une condition doit être vraie.</p>
           <p><strong>NON / aucun :</strong> la relation décrite est interdite ; « aucun témoin ne frôle B. ou V. » exclut les contacts par côté ou par diagonale.</p>
-          <p class="sm:col-span-2 lg:col-span-3"><strong>Grilles aléatoires :</strong> les boutons 6×6 à 9×9 choisissent au hasard entre deux types de progression ; l'unicité de chaque grille est vérifiée avant affichage. Certains se résolvent avec les coups forcés reconnus, d'autres peuvent demander une hypothèse. La certification peut prendre quelques instants ; son état s'affiche dans le badge CSP. Une génération remplace le chapitre courant.</p>
+          <p class="sm:col-span-2 lg:col-span-3"><strong>Grilles aléatoires :</strong> les boutons 6×6 à 9×9 choisissent au hasard entre deux types de progression ; l'unicité de chaque grille est vérifiée avant affichage. Certaines se résolvent avec les coups forcés reconnus, d'autres peuvent demander une hypothèse. Les indices générés désignent les repères par leur nom, sans coordonnées ; des indices de lieu, de bord ou de proximité peuvent être ajoutés pour faciliter les déductions. La certification peut prendre quelques instants ; son état s'affiche dans le badge CSP. Une génération remplace le chapitre courant.</p>
           <p class="sm:col-span-2 lg:col-span-3"><strong>Navigation et sauvegarde :</strong> les trois boutons de chapitre chargent leurs scénarios et effacent la partie en cours. Après une victoire, <strong>Rendez-vous suivant</strong> ouvre le chapitre suivant et revient au premier après le troisième. Les parties et grilles aléatoires ne sont pas sauvegardées : un rechargement de la page les réinitialise.</p>
         </div>
       </div>
@@ -1630,56 +1630,67 @@
       },
 
       addForcedClues(chapter, target) {
-        const directions = [[-1, 0], [1, 0], [0, -1], [0, 1]];
-        const landmarkKeys = Object.keys(LANDMARKS);
-        let nextLandmark = Object.keys(chapter.landmarks).length;
-
-        for (const token of chapter.tokens) {
+        const edges = [
+          ['north', 'nord'], ['east', 'est'], ['south', 'sud'], ['west', 'ouest']
+        ];
+        for (const token of this.shuffle(chapter.tokens)) {
           if (this.canSolveWithoutGuessing(chapter)) return true;
 
           const position = target[token.id];
-          const neighbors = directions
-            .map(([dr, dc]) => ({ r: position.r + dr, c: position.c + dc }))
-            .filter(cell =>
-              cell.r >= 0 &&
-              cell.r < chapter.size &&
-              cell.c >= 0 &&
-              cell.c < chapter.size
-            );
-          const oppositePairs = [
-            [neighbors.find(cell => cell.r < position.r), neighbors.find(cell => cell.r > position.r)],
-            [neighbors.find(cell => cell.c < position.c), neighbors.find(cell => cell.c > position.c)]
-          ].filter(pair => pair.every(Boolean));
-          const isCorner =
-            (position.r === 0 || position.r === chapter.size - 1) &&
-            (position.c === 0 || position.c === chapter.size - 1);
-          const pairs = oppositePairs.length
-            ? oppositePairs
-            : isCorner && neighbors.length === 2 ? [neighbors] : [];
-          if (pairs.length === 0) return false;
-
-          const pair = pairs.sort((a, b) =>
-            a.filter(cell => !chapter.landmarks[`${cell.r},${cell.c}`]).length -
-            b.filter(cell => !chapter.landmarks[`${cell.r},${cell.c}`]).length
-          )[0];
-          const rules = [];
-          const labels = [];
-          for (const cell of pair) {
-            const key = `${cell.r},${cell.c}`;
-            if (!chapter.landmarks[key]) {
-              chapter.landmarks[key] = landmarkKeys[nextLandmark % landmarkKeys.length];
-              nextLandmark++;
-            }
-            labels.push(`${LANDMARKS[chapter.landmarks[key]].label} en ${getCoordLabel(cell.r, cell.c)}`);
-            rules.push(Rule.adjacent(token.id, Rule.landmark(cell.r, cell.c)));
+          const region = chapter.regions[position.r][position.c];
+          const candidates = [
+            {
+              text: `${token.name} se trouve dans le lieu « ${PLACES[region].name} ».`,
+              rule: Rule.inRegion(token.id, region)
+            },
+            {
+              text: `${token.name} se trouve dans un coin.`,
+              rule: Rule.onCorner(token.id)
+            },
+            ...edges.map(([edge, label]) => ({
+              text: `${token.name} se trouve sur le bord ${label}.`,
+              rule: Rule.onEdge(token.id, edge)
+            }))
+          ];
+          for (const [key, type] of Object.entries(chapter.landmarks)) {
+            const [r, c] = key.split(',').map(Number);
+            const adjacent = Rule.adjacent(token.id, Rule.landmark(r, c));
+            const touches = ClueRules.evaluate(adjacent, { [token.id]: position }, chapter);
+            candidates.push({
+              text: `${token.name} ${touches ? 'touche' : 'ne touche pas'} orthogonalement ${LANDMARKS[type].label}.`,
+              rule: touches ? adjacent : Rule.not(adjacent)
+            });
           }
-          if (isCorner) rules.push(Rule.onCorner(token.id));
 
-          chapter.clues.push({
-            id: `gen_forced_${token.id}`,
-            text: `${token.name} touche orthogonalement ${labels.join(' et ')}${isCorner ? ' et se trouve dans un coin' : ''}.`,
-            rule: Rule.and(...rules)
-          });
+          let possible = [];
+          for (let r = 0; r < chapter.size; r++) {
+            for (let c = 0; c < chapter.size; c++) {
+              if (!chapter.landmarks[`${r},${c}`] &&
+                  CSPSolver.isPartialValid({ [token.id]: { r, c } }, chapter)) {
+                possible.push({ r, c });
+              }
+            }
+          }
+
+          for (let index = 0; index < 3 && possible.length > 1; index++) {
+            let best = null;
+            for (const candidate of this.shuffle(candidates)) {
+              if (ClueRules.evaluate(candidate.rule, { [token.id]: position }, chapter) !== true) continue;
+              const remaining = possible.filter(cell =>
+                ClueRules.evaluate(candidate.rule, { [token.id]: cell }, chapter) !== false
+              );
+              if (remaining.length < possible.length && (!best || remaining.length < best.remaining.length)) {
+                best = { candidate, remaining };
+              }
+            }
+            if (!best) break;
+            chapter.clues.push({
+              id: `gen_forced_${token.id}_${index}`,
+              ...best.candidate
+            });
+            possible = best.remaining;
+            if (this.canSolveWithoutGuessing(chapter)) return true;
+          }
         }
 
         return this.canSolveWithoutGuessing(chapter);

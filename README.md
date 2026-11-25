@@ -143,12 +143,17 @@ remplacer la vérification d'unicité.
 Le solveur vérifie chaque grille candidate ; elle n'est présentée qu'après la
 certification d'une solution unique dans la limite de recherche. Le générateur
 choisit aléatoirement entre des grilles résolubles par placements forcés (avec
-des indices d'ancrage ajoutés si nécessaire) et des grilles qui nécessitent une
-hypothèse selon les déductions reconnues. Le badge **Progression** indique la
-catégorie de la grille et son état courant. Le générateur relance les séries de
-tentatives en cédant la main au navigateur entre elles ; la génération peut
-donc prendre un moment. Une grille aléatoire remplace le chapitre courant pour
-la session ; elle n'est pas enregistrée après le rechargement de la page.
+des indices supplémentaires de lieu, de bord ou de proximité si nécessaire)
+et des grilles qui nécessitent une hypothèse selon les déductions reconnues.
+Le badge **Progression** indique l'état des déductions à partir des placements
+courants. Le générateur relance les séries de tentatives en cédant la main au
+navigateur entre elles ; la génération peut donc prendre un moment. Une grille
+aléatoire remplace le chapitre courant pour la session ; elle n'est pas
+enregistrée après le rechargement de la page.
+
+Les indices générés désignent les repères par leur nom, sans coordonnées.
+Chaque case affiche discrètement sa ligne et sa colonne ; au survol, ces
+coordonnées apparaissent aussi au-dessus de la grille.
 
 Pour explorer une piste sur une autre grille, cliquez sur **Hypothèse** avant
 de placer un pion. Le bouton devient **Sous-hypothèse** pendant une piste et
@@ -253,8 +258,19 @@ Après la première exécution réussie, le site est accessible à l'adresse :
 
 ## Développement et vérification
 
-Il n'y a pas de commande de build, de gestionnaire de paquets ni de suite de
-tests automatisés dans le dépôt. Après une modification, vérifiez manuellement :
+Il n'y a pas de commande de build ni de gestionnaire de paquets. Avec Node.js
+20 ou plus récent, les tests ciblés du générateur se lancent depuis la racine
+du dépôt :
+
+```sh
+node --test tests/generator.test.js
+```
+
+Ils vérifient les deux modes pour les tailles de 6 × 6 à 9 × 9 : unicité,
+progression, cohérence des indices et absence de coordonnées dans leur texte.
+Ils ne remplacent pas les vérifications dans le navigateur.
+
+Après une modification, vérifiez aussi manuellement :
 
 1. que chacun des trois chapitres se charge et que le solveur y certifie une
    solution unique ;

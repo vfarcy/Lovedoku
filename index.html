@@ -276,11 +276,12 @@
             <span>💭 Hypothèse, retour arrière et validation</span>
           </div>
           <ul class="space-y-1 text-stone-700 leading-relaxed">
-            <li>• Cliquez sur <strong>Hypothèse</strong> pour créer un point de retour ; cela ne pose aucun pion. Faites ensuite un essai : les pions ajoutés ou déplacés sont signalés par un <strong>?</strong>.</li>
-            <li>• <strong>Annuler</strong> défait seulement le dernier placement ou la dernière croix et laisse l'hypothèse ouverte. Cela permet de corriger un coup sans abandonner toute la piste.</li>
-            <li>• <strong>Revenir avant l'hypothèse</strong> abandonne la branche et restaure les placements, croix et historique sauvegardés au départ de l'essai.</li>
-            <li>• <strong>Valider l'hypothèse</strong> conserve la grille actuelle et ferme ce point de retour. Cela ne certifie pas que les choix sont corrects : le badge CSP continue de vérifier la compatibilité.</li>
-            <li>• <strong>Hypothèse réfutée</strong> indique que les placements actuels de la branche n'ont aucune complétion. Annulez un coup, essayez une autre piste ou revenez au point de départ.</li>
+            <li>• <strong>Hypothèse</strong> crée un point de retour sans poser de pion. Pendant un essai, <strong>Sous-hypothèse</strong> ouvre un niveau imbriqué et sauvegarde aussi son état. Les pions qui diffèrent de l'état précédant la première hypothèse portent un <strong>?</strong>.</li>
+            <li>• <strong>Annuler</strong> défait seulement le dernier placement ou la dernière croix ; les points de retour restent ouverts.</li>
+            <li>• <strong>Revenir au niveau N</strong> abandonne le niveau actif et restaure ses placements, croix, sélection et historique. S'il y a un niveau parent, il reste ouvert.</li>
+            <li>• <strong>Valider le niveau N</strong> garde la branche et ferme uniquement ce point de retour. Le niveau parent reste disponible ; valider le niveau 1 ferme toute la chaîne. Cela ne certifie pas que les choix sont corrects : le badge CSP continue de les vérifier.</li>
+            <li>• À partir du niveau 2, <strong>Tout abandonner</strong> restaure l'état sauvegardé avant la première hypothèse et ferme toute la chaîne. Au niveau 1, utilisez <strong>Revenir au niveau 1</strong>.</li>
+            <li>• <strong>Hypothèse réfutée</strong> signifie que la branche active n'a aucune complétion. Annulez un coup, revenez au niveau actif ou abandonnez toute la chaîne.</li>
           </ul>
         </div>
 
@@ -369,6 +370,9 @@
             </button>
             <button id="accept-hypothesis-btn" onclick="acceptHypothesis()" class="hidden px-2.5 py-1 rounded-xl text-xs font-semibold border border-emerald-300 bg-emerald-50 text-emerald-900 hover:bg-emerald-100 transition">
               ✓ Valider l'hypothèse
+            </button>
+            <button id="rollback-all-hypotheses-btn" onclick="rollbackAllHypotheses()" class="hidden px-2.5 py-1 rounded-xl text-xs font-semibold border border-rose-400 bg-rose-100 text-rose-950 hover:bg-rose-200 transition">
+              ↶ Tout abandonner
             </button>
             <button onclick="resetCurrentChapter()" class="px-2.5 py-1 rounded-xl text-xs font-semibold border border-stone-300 bg-white text-stone-600 hover:bg-rose-50 hover:text-rose-800 transition">
               ↺ Vider
@@ -1936,7 +1940,7 @@
       autoCross: true,
       history: [],
       cspResult: null,
-      hypothesis: null
+      hypotheses: []
     };
 
     function getCoordLabel(r, c) {
@@ -1984,7 +1988,7 @@
       state.selectedToken = ch.tokens[0].id;
       state.crossMode = false;
       state.history = [];
-      state.hypothesis = null;
+      state.hypotheses = [];
       updateHypothesisControls();
       updateDifficultyBadge(ch, integrity);
 
@@ -2035,16 +2039,38 @@
       if (state.history.length > 50) state.history.shift();
     }
 
+    function getCurrentHypothesis() {
+      return state.hypotheses[state.hypotheses.length - 1] || null;
+    }
+
     function updateHypothesisControls() {
-      const active = Boolean(state.hypothesis);
-      document.getElementById('hypothesis-btn')?.classList.toggle('hidden', active);
-      document.getElementById('rollback-hypothesis-btn')?.classList.toggle('hidden', !active);
-      document.getElementById('accept-hypothesis-btn')?.classList.toggle('hidden', !active);
+      const depth = state.hypotheses.length;
+      const active = depth > 0;
+      const hypothesisBtn = document.getElementById('hypothesis-btn');
+      const rollbackBtn = document.getElementById('rollback-hypothesis-btn');
+      const acceptBtn = document.getElementById('accept-hypothesis-btn');
+      const rollbackAllBtn = document.getElementById('rollback-all-hypotheses-btn');
+
+      if (hypothesisBtn) {
+        hypothesisBtn.textContent = active ? '💭 Sous-hypothèse' : '💭 Hypothèse';
+        hypothesisBtn.title = active
+          ? `Ouvrir le niveau ${depth + 1} ; le niveau ${depth} restera disponible.`
+          : 'Créer un point de retour avant de tester une piste.';
+      }
+      if (rollbackBtn) {
+        rollbackBtn.textContent = `↶ Revenir au niveau ${depth}`;
+        rollbackBtn.classList.toggle('hidden', !active);
+      }
+      if (acceptBtn) {
+        acceptBtn.textContent = `✓ Valider le niveau ${depth}`;
+        acceptBtn.classList.toggle('hidden', !active);
+      }
+      if (rollbackAllBtn) rollbackAllBtn.classList.toggle('hidden', depth < 2);
     }
 
     function startHypothesis() {
-      if (state.hypothesis) return;
-      state.hypothesis = {
+      const depth = state.hypotheses.length + 1;
+      state.hypotheses.push({
         placements: JSON.parse(JSON.stringify(state.placements)),
         manualCrosses: new Set(state.manualCrosses),
         selectedToken: state.selectedToken,
@@ -2052,32 +2078,58 @@
           placements: JSON.parse(JSON.stringify(entry.placements)),
           manualCrosses: new Set(entry.manualCrosses)
         }))
-      };
+      });
       updateHypothesisControls();
       if (state.cspResult) updateDeductionStatus(state.cspResult);
-      showFeedback('info', '<strong>Hypothèse activée :</strong> placez un pion pour explorer cette piste. Les placements hypothétiques sont marqués d’un <strong>?</strong> ; vous pourrez revenir à l’état précédent ou valider la piste.');
+      showFeedback('info', `<strong>Hypothèse ${depth} ouverte :</strong> placez un pion pour explorer cette piste. Vous pourrez aussi ouvrir un niveau imbriqué ou revenir à ce point.`);
+    }
+
+    function restoreHypothesis(hypothesis) {
+      state.placements = hypothesis.placements;
+      state.manualCrosses = hypothesis.manualCrosses;
+      state.selectedToken = hypothesis.selectedToken;
+      state.history = hypothesis.history;
     }
 
     function rollbackHypothesis() {
-      if (!state.hypothesis) return;
-      state.placements = state.hypothesis.placements;
-      state.manualCrosses = state.hypothesis.manualCrosses;
-      state.selectedToken = state.hypothesis.selectedToken;
-      state.history = state.hypothesis.history;
-      state.hypothesis = null;
+      const hypothesis = state.hypotheses.pop();
+      if (!hypothesis) return;
+      const rolledBackDepth = state.hypotheses.length + 1;
+      restoreHypothesis(hypothesis);
       updateHypothesisControls();
       hideFeedback();
       renderAll();
       runCSPProof();
+      if (state.hypotheses.length > 0) {
+        showFeedback('info', `<strong>Hypothèse ${rolledBackDepth} abandonnée :</strong> retour au niveau ${state.hypotheses.length}. Ce point de retour parent reste ouvert.`);
+      }
     }
 
     function acceptHypothesis() {
-      if (!state.hypothesis) return;
-      state.hypothesis = null;
+      const acceptedDepth = state.hypotheses.length;
+      if (acceptedDepth === 0) return;
+      state.hypotheses.pop();
       updateHypothesisControls();
       hideFeedback();
       renderAll();
       runCSPProof();
+      if (state.hypotheses.length > 0) {
+        showFeedback('info', `<strong>Hypothèse ${acceptedDepth} validée :</strong> la piste est conservée et le niveau ${state.hypotheses.length} reste ouvert.`);
+      } else {
+        showFeedback('info', '<strong>Hypothèse validée :</strong> la piste est conservée et la chaîne de points de retour est fermée.');
+      }
+    }
+
+    function rollbackAllHypotheses() {
+      const firstHypothesis = state.hypotheses[0];
+      if (!firstHypothesis) return;
+      restoreHypothesis(firstHypothesis);
+      state.hypotheses = [];
+      updateHypothesisControls();
+      hideFeedback();
+      renderAll();
+      runCSPProof();
+      showFeedback('info', '<strong>Toute la chaîne abandonnée :</strong> la grille est restaurée à l’état précédant la première hypothèse.');
     }
 
     function undoAction() {
@@ -2094,7 +2146,7 @@
       saveHistory();
       state.placements = {};
       state.manualCrosses = new Set();
-      state.hypothesis = null;
+      state.hypotheses = [];
       updateHypothesisControls();
       hideFeedback();
       renderAll();
@@ -2484,10 +2536,10 @@
           const regId = regions[r][c];
           const place = PLACES[regId] || PLACES.verriere;
           const tok = tokenAtCell[key];
-          const hypothesisOrigin = state.hypothesis?.placements[tok?.id];
+          const hypothesisOrigin = state.hypotheses[0]?.placements[tok?.id];
           const isHypothesisPlacement = Boolean(
             tok &&
-            state.hypothesis &&
+            state.hypotheses.length > 0 &&
             (!hypothesisOrigin || hypothesisOrigin.r !== r || hypothesisOrigin.c !== c)
           );
           const lmKey = state.chapter.landmarks[key];
@@ -2613,10 +2665,11 @@
       if (!badge) return;
 
       const baseClass = 'text-[11px] font-semibold px-2.5 py-1 rounded-full border';
+      const currentHypothesis = getCurrentHypothesis();
       const hypothesisChanged = Boolean(
-        state.hypothesis &&
+        currentHypothesis &&
         state.chapter.tokens.some(({ id }) => {
-          const before = state.hypothesis.placements[id];
+          const before = currentHypothesis.placements[id];
           const current = state.placements[id];
           return Boolean(before) !== Boolean(current) ||
             (before && current && (before.r !== current.r || before.c !== current.c));
@@ -2628,23 +2681,23 @@
         badge.title = 'Le solveur a atteint sa limite de calcul ; impossible de déterminer si une hypothèse est nécessaire.';
       } else if (proof.solutions.length === 0) {
         badge.className = `${baseClass} bg-rose-50 text-rose-900 border-rose-300`;
-        badge.textContent = state.hypothesis && hypothesisChanged ? '⚠️ Hypothèse réfutée' : '⚠️ Piste bloquée';
+        badge.textContent = currentHypothesis && hypothesisChanged ? '⚠️ Hypothèse réfutée' : '⚠️ Piste bloquée';
         badge.title = 'Aucune solution ne respecte les placements actuels. Revenez en arrière ou corrigez un placement.';
       } else if (proof.solutions.length > 1) {
         badge.className = `${baseClass} bg-amber-50 text-amber-900 border-amber-300`;
         badge.textContent = 'ℹ️ Plusieurs solutions';
         badge.title = 'Plusieurs solutions restent compatibles ; les placements actuels ne permettent pas de trancher.';
-      } else if (state.hypothesis && !hypothesisChanged) {
+      } else if (currentHypothesis && !hypothesisChanged) {
         badge.className = `${baseClass} bg-amber-50 text-amber-900 border-amber-300`;
         badge.textContent = '💭 Hypothèse ouverte';
         badge.title = 'Le point de retour est prêt. Placez un pion pour tester cette piste, puis validez-la ou revenez en arrière.';
       } else if (CSPSolver.canSolveWithoutGuessing(state.chapter, state.placements)) {
         badge.className = `${baseClass} bg-emerald-50 text-emerald-900 border-emerald-300`;
-        badge.textContent = state.hypothesis ? '✅ Suite déductible' : '✅ Sans hypothèse';
+        badge.textContent = currentHypothesis ? '✅ Suite déductible' : '✅ Sans hypothèse';
         badge.title = 'Les placements restants peuvent être déterminés par les coups forcés reconnus par le solveur.';
       } else {
         badge.className = `${baseClass} bg-amber-50 text-amber-900 border-amber-300`;
-        badge.textContent = state.hypothesis ? '🤔 Autre hypothèse requise' : '🤔 Hypothèse requise';
+        badge.textContent = currentHypothesis ? '🤔 Autre hypothèse requise' : '🤔 Hypothèse requise';
         badge.title = 'Aucun coup forcé reconnu ne permet de terminer. Selon les déductions implémentées, il faut essayer une piste ou utiliser une autre méthode de déduction.';
       }
     }

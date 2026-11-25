@@ -151,11 +151,16 @@ donc prendre un moment. Une grille aléatoire remplace le chapitre courant pour
 la session ; elle n'est pas enregistrée après le rechargement de la page.
 
 Pour explorer une piste sur une autre grille, cliquez sur **Hypothèse** avant
-de placer un pion. Les placements ajoutés ou déplacés pendant cette branche
-sont marqués d'un **?**. **Revenir avant l'hypothèse** restaure les placements,
-croix et historique de départ ; **Valider l'hypothèse** conserve la piste et
-retire ses marques. L'annulation habituelle reste disponible pendant une
-hypothèse.
+de placer un pion. Le bouton devient **Sous-hypothèse** pendant une piste et
+ouvre un nouveau niveau imbriqué. Les placements qui diffèrent de l'état
+précédant la première hypothèse sont marqués d'un **?**. **Revenir au niveau N**
+abandonne seulement le niveau actif et restaure son état de départ ; les niveaux
+parents restent ouverts. **Valider le niveau N** conserve la piste et ferme ce
+niveau, sans fermer son parent. **Tout abandonner** (disponible à partir du
+niveau 2) restaure l'état précédant la première hypothèse et ferme toute la
+chaîne ; au niveau 1, **Revenir au niveau 1** produit le même effet.
+**Annuler** reste disponible pour défaire un placement ou une croix sans fermer
+les points de retour.
 
 ## Solveur et indices
 

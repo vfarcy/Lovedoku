@@ -1,9 +1,10 @@
 # Lovedoku — Rendez-vous Secrets
 
-Lovedoku est un jeu de déduction dans lequel il faut placer neuf silhouettes sur
+Lovedoku est un jeu de déduction dans lequel il faut placer les silhouettes sur
 une grille, respecter les indices de chaque chapitre et permettre à B. et V. de
-se retrouver seuls dans un même lieu. Le jeu est entièrement exécuté dans le
-navigateur.
+se retrouver seuls dans un même lieu. Les chapitres scénarisés utilisent neuf
+silhouettes ; les grilles aléatoires en utilisent de six à neuf. Le jeu est
+entièrement exécuté dans le navigateur.
 
 ## Sommaire
 
@@ -30,6 +31,7 @@ navigateur.
 - Croix d'exclusion manuelles et hachures automatiques.
 - Annulation des actions, suivi visuel des indices et vérification de la
   solution.
+- Hypothèses réversibles, avec repérage visuel des placements testés.
 - Damier encadré façon papier ancien, avec frontières de lieux contrastées et
   repères visuels au survol et au focus clavier.
 - Solveur par contraintes avec recherche en profondeur, heuristique MRV et
@@ -79,7 +81,7 @@ vérification à la demande.
 | Action | Commande |
 | --- | --- |
 | Placer la silhouette sélectionnée | Clic gauche ou toucher une case libre |
-| Retirer une silhouette | Cliquer sur sa case |
+| Retirer une silhouette | Sélectionner cette silhouette dans la palette, puis cliquer sur sa case |
 | Remplacer une silhouette sur une case | Sélectionner une autre silhouette, puis cliquer sur la case occupée |
 | Sélectionner une silhouette | Cliquer sur sa vignette dans la palette |
 | Marquer ou retirer une croix | Clic droit sur une case libre |
@@ -121,8 +123,9 @@ les placements de la partie précédente ne sont pas conservés.
 Les trois scénarios prédéfinis sont conçus pour admettre chacun exactement une
 solution. À chaque chargement, le solveur vérifie cette unicité avant
 d'afficher le chapitre. Si elle ne peut pas être certifiée (aucune solution,
-plusieurs solutions ou limite de calcul atteinte), le jeu génère en mémoire
-une grille unique de même taille et conserve les métadonnées du chapitre.
+plusieurs solutions ou limite de calcul atteinte), le jeu génère en mémoire une
+grille unique de même taille pour la session courante et conserve l'identité
+narrative du chapitre.
 
 ## Grilles aléatoires
 
@@ -139,10 +142,20 @@ remplacer la vérification d'unicité.
 
 Le solveur vérifie chaque grille candidate ; elle n'est présentée qu'après la
 certification d'une solution unique dans la limite de recherche. Le générateur
-relance les séries de tentatives en cédant la main au navigateur entre elles ;
-la génération peut donc prendre un moment. Une grille aléatoire remplace le
-chapitre courant pour la session ; elle n'est pas enregistrée après le
-rechargement de la page.
+choisit aléatoirement entre des grilles résolubles par placements forcés (avec
+des indices d'ancrage ajoutés si nécessaire) et des grilles qui nécessitent une
+hypothèse selon les déductions reconnues. Le badge **Progression** indique la
+catégorie de la grille et son état courant. Le générateur relance les séries de
+tentatives en cédant la main au navigateur entre elles ; la génération peut
+donc prendre un moment. Une grille aléatoire remplace le chapitre courant pour
+la session ; elle n'est pas enregistrée après le rechargement de la page.
+
+Pour explorer une piste sur une autre grille, cliquez sur **Hypothèse** avant
+de placer un pion. Les placements ajoutés ou déplacés pendant cette branche
+sont marqués d'un **?**. **Revenir avant l'hypothèse** restaure les placements,
+croix et historique de départ ; **Valider l'hypothèse** conserve la piste et
+retire ses marques. L'annulation habituelle reste disponible pendant une
+hypothèse.
 
 ## Solveur et indices
 
@@ -154,7 +167,9 @@ sert au solveur et à la validation finale ; les règles composées peuvent donc
 être vérifiées aussi pendant les placements partiels.
 
 Les indices se définissent dans `index.html` avec les constructeurs `Rule`.
-Par exemple, une proximité et une distance peuvent être réunies ainsi :
+Les coordonnées utilisées dans le code sont indexées à partir de zéro : `(0, 0)`
+est la case en haut à gauche. Par exemple, une proximité et une distance peuvent
+être réunies ainsi :
 
 ```js
 Rule.and(
@@ -178,6 +193,14 @@ Le badge CSP indique si la piste a une solution, plusieurs solutions ou aucune.
 La recherche est plafonnée afin de préserver la réactivité de la page : si ce
 plafond est atteint, le résultat est affiché comme **indéterminé** et non comme
 une preuve d'absence ou d'unicité.
+
+Le badge **Progression** indique, à partir des placements actuels, si le solveur
+voit une suite de coups forcés ou s'il est bloqué et recommande une hypothèse.
+Les déductions reconnues sont une case unique pour un jeton, ou une seule
+possibilité dans une ligne ou une colonne, en tenant compte des contradictions
+détectées dans les indices. **Hypothèse requise** signifie donc qu'aucun coup
+forcé de ces types n'a été trouvé ; une déduction humaine plus avancée peut
+toutefois éviter de supposer.
 
 Le bouton **Indice logique (CSP)** fournit une position compatible avec les
 contraintes restantes. Si plusieurs solutions sont déjà trouvées, la position
@@ -226,12 +249,14 @@ tests automatisés dans le dépôt. Après une modification, vérifiez manuellem
 
 1. que chacun des trois chapitres se charge et que le solveur y certifie une
    solution unique ;
-2. que les placements et les croisements de lignes/colonnes mettent à jour le
-   badge CSP ;
+2. que les placements mettent à jour les badges CSP et **Progression** ; les
+   croix manuelles sont des annotations et ne modifient pas les contraintes du
+   solveur ;
 3. que l'annulation, les croix et le raccourci d'aide fonctionnent ;
 4. que les indices ET/OU/NON et les règles de direction, bordure, coin et lieu
    sont évalués de la même façon par le solveur et la validation finale ;
 5. que le bouton d'indice distingue une possibilité d'une position forcée ;
-6. que les générateurs 6 × 6 et 9 × 9 produisent une grille utilisable ;
+6. que les générateurs de 6 × 6 à 9 × 9 produisent des grilles à solution
+   unique dans les deux modes de progression ;
 7. que la validation n'affiche la victoire qu'après respect de toutes les
    règles et de tous les indices.

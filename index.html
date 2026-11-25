@@ -183,7 +183,7 @@
             <span class="text-xs font-sans font-normal text-stone-500">(Raccourci clavier : touche <kbd class="px-1.5 py-0.5 bg-white border border-stone-300 rounded text-[11px]">?</kbd>)</span>
           </h2>
           <p class="text-xs text-stone-600 mt-0.5">
-            Repères pour comprendre les indices et utiliser la grille, sur ordinateur comme sur écran tactile.
+            Règles, commandes, outils, statuts du solveur et vocabulaire des indices.
           </p>
         </div>
         <button onclick="toggleErgonomicsGuide()" class="text-xs font-semibold text-stone-500 hover:text-[#6b1d3a] px-2.5 py-1 rounded-lg hover:bg-rose-100/60 transition">
@@ -191,55 +191,115 @@
         </button>
       </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-3 text-xs">
         <div class="bg-white/90 rounded-xl p-3.5 border border-rose-200/70">
           <div class="font-bold text-[#6b1d3a] mb-1 flex items-center gap-1.5">
-            <span>🖱️ Contrôles &amp; Raccourcis</span>
+            <span>🎯 But et règles du jeu</span>
           </div>
           <ul class="space-y-1 text-stone-700 leading-relaxed">
-            <li>• <strong>Clic gauche / Tap :</strong> pose ou retire la silhouette sélectionnée.</li>
-            <li>• <strong>Clic droit / Double-clic :</strong> pose ou retire une croix d'exclusion (<span class="font-bold text-rose-700">✕</span>).</li>
-            <li>• <strong><kbd class="px-1 bg-stone-100 border rounded">Ctrl+Z</kbd> :</strong> annule le dernier coup joué.</li>
+            <li>• Placez chaque silhouette sur une case libre, sans repère ; chaque ligne et chaque colonne doit contenir exactement une silhouette.</li>
+            <li>• B. et V. doivent se retrouver dans le même lieu coloré ; aucun autre témoin ne peut partager ce lieu.</li>
+            <li>• Les dessins de fontaine, piano, bougie, etc. sont des repères fixes : leur case est interdite aux silhouettes. La légende sous la grille associe les couleurs aux noms des lieux.</li>
+            <li>• Respectez tous les témoignages du carnet. Quand toutes les silhouettes sont posées, le jeu vérifie automatiquement la grille ; <strong>Sceller le rendez-vous</strong> lance aussi la vérification à la demande.</li>
+            <li>• Une grille peut avoir une solution unique sans que les déductions automatiques du jeu suffisent à la trouver sans hypothèse.</li>
           </ul>
         </div>
 
         <div class="bg-white/90 rounded-xl p-3.5 border border-rose-200/70">
           <div class="font-bold text-[#6b1d3a] mb-1 flex items-center gap-1.5">
-            <span>✨ Automatisation Intelligente</span>
+            <span>🖱️ Contrôles, sélection et annulation</span>
           </div>
           <ul class="space-y-1 text-stone-700 leading-relaxed">
-            <li>• <strong>Auto-croix dynamique :</strong> hachure automatiquement les lignes/colonnes occupées et verrouille un lieu dès que <strong>B. &amp; V.</strong> y sont réunis.</li>
-            <li>• <strong>Carnet interactif :</strong> cliquez sur chaque indice pour le cocher au fur et à mesure de vos déductions.</li>
+            <li>• Choisissez une silhouette dans la palette, puis cliquez ou touchez une case libre pour la placer. Après un placement, la palette sélectionne automatiquement la prochaine silhouette non placée.</li>
+            <li>• Pour retirer un pion sans le remplacer, sélectionnez d'abord ce même pion dans la palette, puis cliquez sur sa case. Si un autre pion est sélectionné, cliquer sur une case occupée le remplace.</li>
+            <li>• <strong>Annuler</strong>, <kbd class="px-1 bg-stone-100 border rounded">Ctrl+Z</kbd> ou <kbd class="px-1 bg-stone-100 border rounded">Cmd+Z</kbd> annule le dernier placement ou changement de croix. Cela n'annule pas une coche du carnet ni l'ouverture d'une hypothèse.</li>
+            <li>• <strong>Vider</strong> enlève les placements et les croix manuelles de la grille courante ; cela ne décoche pas les témoignages.</li>
+            <li>• Sur clavier, utilisez <kbd class="px-1 bg-stone-100 border rounded">Tab</kbd> pour parcourir les commandes et cases, puis <kbd class="px-1 bg-stone-100 border rounded">Entrée</kbd> ou <kbd class="px-1 bg-stone-100 border rounded">Espace</kbd> pour activer le contrôle ciblé.</li>
+            <li>• <kbd class="px-1 bg-stone-100 border rounded">?</kbd> affiche ou masque cette aide ; <kbd class="px-1 bg-stone-100 border rounded">Échap</kbd> ferme la fenêtre de victoire.</li>
           </ul>
         </div>
 
         <div class="bg-white/90 rounded-xl p-3.5 border border-rose-200/70">
           <div class="font-bold text-[#6b1d3a] mb-1 flex items-center gap-1.5">
-            <span>⚙️ Moteur CSP &amp; Indice Logique</span>
+            <span>✕ Croix, auto-croix et carnet</span>
           </div>
           <ul class="space-y-1 text-stone-700 leading-relaxed">
-            <li>• <strong>Analyse temps réel :</strong> vérifie à chaque coup si vos placements restent compatibles avec une solution.</li>
-            <li>• <strong>Indice logique :</strong> calcule les cases candidates restantes (heuristique MRV) ou isole précisément un pion en contradiction.</li>
-            <li>• <strong>Difficulté estimée :</strong> sur la grille vide, le score additionne les nœuds explorés par le solveur, 30 points par opérateur <strong>OU</strong> et 10 par <strong>NON</strong>.</li>
-            <li>• <strong>Échelle :</strong> jusqu'à 300 points, <strong>Accessible</strong> ; jusqu'à 1 200, <strong>Intermédiaire</strong> ; au-delà, <strong>Soutenue</strong>. C'est un repère d'effort pour le solveur, pas une mesure de difficulté humaine. Si l'unicité n'est pas certifiée ou si la recherche atteint sa limite, aucune estimation n'est affichée.</li>
+            <li>• Une croix manuelle est une annotation personnelle : elle ne bloque pas la case pour le solveur. Clic droit pour la poser ou la retirer ; sur écran tactile, activez <strong>Mode Croix</strong>, puis touchez la case. Les cases occupées et les repères ne peuvent pas recevoir de croix.</li>
+            <li>• <strong>Auto-croix</strong> hachure les lignes et colonnes occupées ; quand B. et V. partagent un lieu, elle signale aussi les autres cases de ce lieu comme exclues. Désactivez-la si vous préférez ne pas afficher ces aides.</li>
+            <li>• Cliquez sur un témoignage pour cocher ou décocher votre suivi personnel. Cette coche n'indique pas que le jeu a vérifié l'indice.</li>
+            <li>• La coordonnée affichée au survol est de la forme <strong>Ligne·Colonne</strong>, avec des numéros à partir de 1.</li>
           </ul>
+        </div>
+
+        <div class="bg-white/90 rounded-xl p-3.5 border border-rose-200/70">
+          <div class="font-bold text-[#6b1d3a] mb-1 flex items-center gap-1.5">
+            <span>🔎 Badge CSP : compatibilité des placements</span>
+          </div>
+          <ul class="space-y-1 text-stone-700 leading-relaxed">
+            <li>• Le solveur vérifie les lignes, colonnes, lieux, repères et témoignages. Il actualise le résultat après les changements de placement ; les croix manuelles n'entrent pas dans ce calcul.</li>
+            <li>• <strong>Preuve CSP : 1 solution</strong> certifie une solution complète unique. Avec des placements déjà posés, <strong>Piste valide : 1 solution</strong> signifie qu'il reste une complétion possible et unique.</li>
+            <li>• <strong>2+ solutions</strong> signifie qu'au moins deux complétions ont été trouvées : les placements actuels ne déterminent pas encore une réponse unique. La recherche s'arrête après en avoir trouvé deux.</li>
+            <li>• <strong>0 solution / Piste bloquée</strong> signifie qu'aucune complétion ne respecte les règles avec les placements actuels. Sous une hypothèse modifiée, le badge devient <strong>Hypothèse réfutée</strong>.</li>
+            <li>• <strong>Indéterminé</strong> signifie que la limite de recherche a été atteinte ; ce n'est ni une preuve d'absence de solution, ni une preuve d'unicité.</li>
+          </ul>
+        </div>
+
+        <div class="bg-white/90 rounded-xl p-3.5 border border-rose-200/70">
+          <div class="font-bold text-[#6b1d3a] mb-1 flex items-center gap-1.5">
+            <span>🧠 Badge Progression : déduire ou essayer</span>
+          </div>
+          <ul class="space-y-1 text-stone-700 leading-relaxed">
+            <li>• <strong>Sans hypothèse</strong> indique que les règles automatiques trouvent une suite de placements forcés à partir de la grille actuelle. Le badge est recalculé après vos placements.</li>
+            <li>• Le test reconnaît une seule case possible pour un pion, ou une seule possibilité dans une ligne ou une colonne. Il ne couvre pas toutes les techniques de déduction humaines.</li>
+            <li>• <strong>Hypothèse requise</strong> signifie qu'aucun de ces coups forcés n'a été trouvé ; une déduction plus avancée peut néanmoins permettre de continuer sans supposer.</li>
+            <li>• <strong>Plusieurs solutions</strong>, <strong>Piste bloquée</strong> et <strong>Indéterminée</strong> décrivent respectivement plusieurs complétions, aucune complétion, ou une recherche interrompue.</li>
+            <li>• Pendant une hypothèse, <strong>Hypothèse ouverte</strong> signifie que le point de retour est prêt ; <strong>Suite déductible</strong> indique que les coups forcés reconnus suffisent à partir des placements testés.</li>
+            <li>• Ce badge ne prouve pas que le puzzle est unique : l'unicité est indiquée séparément par le badge CSP.</li>
+          </ul>
+        </div>
+
+        <div class="bg-white/90 rounded-xl p-3.5 border border-rose-200/70">
+          <div class="font-bold text-[#6b1d3a] mb-1 flex items-center gap-1.5">
+            <span>💡 Indice logique et difficulté estimée</span>
+          </div>
+          <ul class="space-y-1 text-stone-700 leading-relaxed">
+            <li>• <strong>Indice logique (CSP)</strong> propose une position tirée d'une solution compatible. Si une seule solution reste, cette position est forcée ; s'il en reste plusieurs, elle n'est qu'un exemple. En cas de recherche incomplète ou de contradiction, le message le précise.</li>
+            <li>• Si les placements bloquent toute solution, l'indice peut signaler une contradiction et identifier un pion posé dont le retrait rétablit une possibilité ; si aucun pion isolé ne suffit, il signale une contradiction multiple.</li>
+            <li>• <strong>Difficulté estimée</strong> mesure une heuristique de recherche, pas la difficulté humaine ni le besoin d'hypothèse. Elle est calculée sur la grille vide : nœuds explorés par le CSP + 30 points par opérateur <strong>OU</strong> + 10 par <strong>NON</strong>.</li>
+            <li>• Catégories : <strong>Accessible</strong> jusqu'à 300 points ; <strong>Intermédiaire</strong> de 301 à 1 200 ; <strong>Soutenue</strong> au-delà. Deux grilles pouvant avoir la même catégorie, ce score ne distingue pas nécessairement les grilles avec et sans hypothèse.</li>
+            <li>• Aucune estimation n'est affichée si le solveur ne certifie pas une solution unique ou atteint sa limite.</li>
+          </ul>
+        </div>
+
+        <div class="bg-white/90 rounded-xl p-3.5 border border-rose-200/70">
+          <div class="font-bold text-[#6b1d3a] mb-1 flex items-center gap-1.5">
+            <span>💭 Hypothèse, retour arrière et validation</span>
+          </div>
+          <ul class="space-y-1 text-stone-700 leading-relaxed">
+            <li>• Cliquez sur <strong>Hypothèse</strong> pour créer un point de retour ; cela ne pose aucun pion. Faites ensuite un essai : les pions ajoutés ou déplacés sont signalés par un <strong>?</strong>.</li>
+            <li>• <strong>Annuler</strong> défait seulement le dernier placement ou la dernière croix et laisse l'hypothèse ouverte. Cela permet de corriger un coup sans abandonner toute la piste.</li>
+            <li>• <strong>Revenir avant l'hypothèse</strong> abandonne la branche et restaure les placements, croix et historique sauvegardés au départ de l'essai.</li>
+            <li>• <strong>Valider l'hypothèse</strong> conserve la grille actuelle et ferme ce point de retour. Cela ne certifie pas que les choix sont corrects : le badge CSP continue de vérifier la compatibilité.</li>
+            <li>• <strong>Hypothèse réfutée</strong> indique que les placements actuels de la branche n'ont aucune complétion. Annulez un coup, essayez une autre piste ou revenez au point de départ.</li>
+          </ul>
+        </div>
+
+        <div class="lg:col-span-2 bg-amber-50/80 rounded-xl p-3.5 border border-amber-200">
+          <h3 class="font-bold text-[#6b1d3a] mb-2">📖 Lire les témoignages et les grilles générées</h3>
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-5 gap-y-2 text-stone-700 leading-relaxed">
+          <p><strong>Voisinage orthogonal :</strong> partage un côté avec le repère ou l'autre silhouette ; un coin ne compte pas.</p>
+          <p><strong>Voisinage diagonal :</strong> les cases se touchent par un coin. <strong>Voisinage du roi :</strong> côté ou coin, parmi les huit cases autour.</p>
+          <p><strong>Distance / pas de marche :</strong> distance de Manhattan ; on additionne déplacements horizontaux et verticaux, sans raccourci diagonal.</p>
+          <p><strong>Direction :</strong> nord = numéro de ligne plus petit ; sud = plus grand. Ouest/est se lisent de gauche à droite ; les cases n'ont pas besoin d'être alignées.</p>
+          <p><strong>Bordure et coin :</strong> bordure = pourtour ; coin = l'une des quatre cases extrêmes. « À l'intérieur d'un lieu » signifie que les quatre voisines orthogonales restent dans ce lieu.</p>
+          <p><strong>Frontière :</strong> une case est à la frontière si elle touche orthogonalement une case d'un autre lieu. Deux lieux sont considérés en relation de proximité s'ils sont identiques ou partagent un côté, jamais par un simple coin.</p>
+          <p><strong>ET :</strong> toutes les conditions doivent être vraies.</p>
+          <p><strong>OU :</strong> au moins une condition doit être vraie.</p>
+          <p><strong>NON / aucun :</strong> la relation décrite est interdite ; « aucun témoin ne frôle B. ou V. » exclut les contacts par côté ou par diagonale.</p>
+          <p class="sm:col-span-2 lg:col-span-3"><strong>Grilles aléatoires :</strong> les boutons 6×6 à 9×9 choisissent au hasard entre deux types de progression ; l'unicité de chaque grille est vérifiée avant affichage. Certains se résolvent avec les coups forcés reconnus, d'autres peuvent demander une hypothèse. La certification peut prendre quelques instants ; son état s'affiche dans le badge CSP. Une génération remplace le chapitre courant.</p>
+          <p class="sm:col-span-2 lg:col-span-3"><strong>Navigation et sauvegarde :</strong> les trois boutons de chapitre chargent leurs scénarios et effacent la partie en cours. Après une victoire, <strong>Rendez-vous suivant</strong> ouvre le chapitre suivant et revient au premier après le troisième. Les parties et grilles aléatoires ne sont pas sauvegardées : un rechargement de la page les réinitialise.</p>
         </div>
       </div>
-
-      <div class="mt-3 rounded-xl border border-amber-200 bg-white/90 p-3.5 text-xs text-stone-700">
-        <h3 class="font-bold text-[#6b1d3a] mb-2">📖 Comprendre les indices : exemples</h3>
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-5 gap-y-2 leading-relaxed">
-          <p><strong>Voisinage orthogonal :</strong> la silhouette partage un côté avec le repère ou l'autre silhouette. Un contact par un coin ne compte pas.</p>
-          <p><strong>Voisinage diagonal :</strong> les cases se touchent par un coin. <strong>Voisinage du roi :</strong> accepte un côté ou un coin, donc les 8 cases autour.</p>
-          <p><strong>« À 3 pas de marche » :</strong> additionne les déplacements horizontaux et verticaux. Deux cases à droite et une vers le bas font 3 pas, sans raccourci diagonal.</p>
-          <p><strong>Direction :</strong> « au nord de » signifie sur une ligne plus haute de la grille ; les silhouettes n'ont pas besoin d'être dans la même colonne. Est/ouest se lisent de gauche à droite.</p>
-          <p><strong>Bordure et coin :</strong> la bordure est le pourtour de la grille ; un coin est l'une de ses 4 cases extrêmes. « À l'intérieur d'un lieu » exige que les 4 voisines orthogonales restent dans ce lieu.</p>
-          <p><strong>Frontière d'un lieu :</strong> la case touche orthogonalement une case d'un autre lieu. Deux lieux « se touchent » s'ils sont identiques ou partagent un côté, jamais par un simple coin.</p>
-          <p><strong>ET :</strong> toutes les parties doivent être vraies, par exemple « près du Piano ET à 3 pas de Bibiche ».</p>
-          <p><strong>OU :</strong> au moins une partie doit être vraie, par exemple « sur le bord nord OU sur le bord ouest ».</p>
-          <p><strong>NON / aucun :</strong> la relation est interdite, par exemple « aucun témoin n'est voisin de B. ou V. », côté ou diagonale compris.</p>
-          <p class="sm:col-span-2 lg:col-span-3"><strong>Règles de la grille :</strong> une seule silhouette par ligne et par colonne ; B. et V. doivent être dans le même lieu, sans témoin dans ce lieu. Une croix marque une case exclue, pas un indice supplémentaire.</p>
-        </div>
       </div>
     </div>
   </section>
@@ -259,6 +319,9 @@
             </span>
             <span id="csp-status-badge" class="inline-flex items-center gap-1 text-[11px] font-semibold px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-900 border border-emerald-300">
               <span>✅</span><span>Preuve CSP : 1 solution</span>
+            </span>
+            <span id="deduction-status-badge" title="Indique si les déductions automatiques reconnues suffisent depuis les placements actuels." class="text-[11px] font-semibold px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-900 border border-emerald-300">
+              Progression : calcul…
             </span>
             <span id="difficulty-badge" title="Estimation heuristique fondée sur l'effort du solveur et la composition logique des indices." class="text-[11px] font-semibold px-2.5 py-1 rounded-full bg-violet-50 text-violet-900 border border-violet-300">
               Difficulté estimée
@@ -297,6 +360,15 @@
             </button>
             <button id="undo-btn" onclick="undoAction()" disabled class="px-2.5 py-1 rounded-xl text-xs font-semibold border border-stone-300 bg-white text-stone-600 hover:bg-stone-100 disabled:opacity-40 transition">
               ↩ Annuler
+            </button>
+            <button id="hypothesis-btn" onclick="startHypothesis()" class="px-2.5 py-1 rounded-xl text-xs font-semibold border border-amber-300 bg-amber-50 text-amber-900 hover:bg-amber-100 transition">
+              💭 Hypothèse
+            </button>
+            <button id="rollback-hypothesis-btn" onclick="rollbackHypothesis()" class="hidden px-2.5 py-1 rounded-xl text-xs font-semibold border border-rose-300 bg-rose-50 text-rose-900 hover:bg-rose-100 transition">
+              ↶ Revenir avant l'hypothèse
+            </button>
+            <button id="accept-hypothesis-btn" onclick="acceptHypothesis()" class="hidden px-2.5 py-1 rounded-xl text-xs font-semibold border border-emerald-300 bg-emerald-50 text-emerald-900 hover:bg-emerald-100 transition">
+              ✓ Valider l'hypothèse
             </button>
             <button onclick="resetCurrentChapter()" class="px-2.5 py-1 rounded-xl text-xs font-semibold border border-stone-300 bg-white text-stone-600 hover:bg-rose-50 hover:text-rose-800 transition">
               ↺ Vider
@@ -1426,6 +1498,87 @@
 
         backtrack(initAssign, initR, initC);
         return { solutions, nodes, timedOut };
+      },
+
+      canSolveWithoutGuessing(chapter, fixedPlacements = {}) {
+        const assignment = {};
+        const usedRows = new Set();
+        const usedCols = new Set();
+        const tokens = chapter.tokens.map(token => token.id);
+        const tokenIds = new Set(tokens);
+        const landmarkCoords = new Set(Object.keys(chapter.landmarks));
+
+        for (const [token, position] of Object.entries(fixedPlacements)) {
+          if (!position) continue;
+          if (
+            !tokenIds.has(token) ||
+            !Number.isInteger(position.r) ||
+            !Number.isInteger(position.c) ||
+            position.r < 0 ||
+            position.r >= chapter.size ||
+            position.c < 0 ||
+            position.c >= chapter.size ||
+            landmarkCoords.has(`${position.r},${position.c}`) ||
+            usedRows.has(position.r) ||
+            usedCols.has(position.c)
+          ) return false;
+          assignment[token] = { r: position.r, c: position.c };
+          usedRows.add(position.r);
+          usedCols.add(position.c);
+        }
+        if (!this.isPartialValid(assignment, chapter)) return false;
+
+        while (Object.keys(assignment).length < tokens.length) {
+          const candidatesByToken = {};
+          for (const token of tokens) {
+            if (assignment[token]) continue;
+            candidatesByToken[token] = [];
+            for (let r = 0; r < chapter.size; r++) {
+              if (usedRows.has(r)) continue;
+              for (let c = 0; c < chapter.size; c++) {
+                if (usedCols.has(c) || landmarkCoords.has(`${r},${c}`)) continue;
+                const candidate = { ...assignment, [token]: { r, c } };
+                if (this.isPartialValid(candidate, chapter)) {
+                  candidatesByToken[token].push({ r, c });
+                }
+              }
+            }
+            if (candidatesByToken[token].length === 0) return false;
+          }
+
+          let forcedMove = null;
+          for (const token of tokens) {
+            if (candidatesByToken[token]?.length === 1) {
+              forcedMove = { token, ...candidatesByToken[token][0] };
+              break;
+            }
+          }
+
+          if (!forcedMove) {
+            for (const axis of ['row', 'column']) {
+              for (let value = 0; value < chapter.size && !forcedMove; value++) {
+                if ((axis === 'row' ? usedRows : usedCols).has(value)) continue;
+                const possible = [];
+                for (const [token, candidates] of Object.entries(candidatesByToken)) {
+                  for (const position of candidates) {
+                    if ((axis === 'row' ? position.r : position.c) === value) {
+                      possible.push({ token, ...position });
+                    }
+                  }
+                }
+                if (possible.length === 1) forcedMove = possible[0];
+              }
+              if (forcedMove) break;
+            }
+          }
+
+          if (!forcedMove) return false;
+          assignment[forcedMove.token] = { r: forcedMove.r, c: forcedMove.c };
+          usedRows.add(forcedMove.r);
+          usedCols.add(forcedMove.c);
+        }
+
+        return this.isPartialValid(assignment, chapter);
       }
     };
 
@@ -1464,7 +1617,67 @@
         return a;
       },
 
-      generate(size = 7) {
+      canSolveWithoutGuessing(chapter) {
+        return CSPSolver.canSolveWithoutGuessing(chapter);
+      },
+
+      addForcedClues(chapter, target) {
+        const directions = [[-1, 0], [1, 0], [0, -1], [0, 1]];
+        const landmarkKeys = Object.keys(LANDMARKS);
+        let nextLandmark = Object.keys(chapter.landmarks).length;
+
+        for (const token of chapter.tokens) {
+          if (this.canSolveWithoutGuessing(chapter)) return true;
+
+          const position = target[token.id];
+          const neighbors = directions
+            .map(([dr, dc]) => ({ r: position.r + dr, c: position.c + dc }))
+            .filter(cell =>
+              cell.r >= 0 &&
+              cell.r < chapter.size &&
+              cell.c >= 0 &&
+              cell.c < chapter.size
+            );
+          const oppositePairs = [
+            [neighbors.find(cell => cell.r < position.r), neighbors.find(cell => cell.r > position.r)],
+            [neighbors.find(cell => cell.c < position.c), neighbors.find(cell => cell.c > position.c)]
+          ].filter(pair => pair.every(Boolean));
+          const isCorner =
+            (position.r === 0 || position.r === chapter.size - 1) &&
+            (position.c === 0 || position.c === chapter.size - 1);
+          const pairs = oppositePairs.length
+            ? oppositePairs
+            : isCorner && neighbors.length === 2 ? [neighbors] : [];
+          if (pairs.length === 0) return false;
+
+          const pair = pairs.sort((a, b) =>
+            a.filter(cell => !chapter.landmarks[`${cell.r},${cell.c}`]).length -
+            b.filter(cell => !chapter.landmarks[`${cell.r},${cell.c}`]).length
+          )[0];
+          const rules = [];
+          const labels = [];
+          for (const cell of pair) {
+            const key = `${cell.r},${cell.c}`;
+            if (!chapter.landmarks[key]) {
+              chapter.landmarks[key] = landmarkKeys[nextLandmark % landmarkKeys.length];
+              nextLandmark++;
+            }
+            labels.push(`${LANDMARKS[chapter.landmarks[key]].label} en ${getCoordLabel(cell.r, cell.c)}`);
+            rules.push(Rule.adjacent(token.id, Rule.landmark(cell.r, cell.c)));
+          }
+          if (isCorner) rules.push(Rule.onCorner(token.id));
+
+          chapter.clues.push({
+            id: `gen_forced_${token.id}`,
+            text: `${token.name} touche orthogonalement ${labels.join(' et ')}${isCorner ? ' et se trouve dans un coin' : ''}.`,
+            rule: Rule.and(...rules)
+          });
+        }
+
+        return this.canSolveWithoutGuessing(chapter);
+      },
+
+      generate(size = 7, requiresHypothesis = Math.random() < 0.5) {
         const placeKeys = Object.keys(PLACES).slice(0, size);
         const landmarkKeys = Object.keys(LANDMARKS);
         const tokens = ALL_TOKENS_POOL.slice(0, size);
@@ -1643,7 +1856,7 @@
             id: `gen-${size}-${Date.now()}`,
             badge: `Grille Aléatoire ${size}×${size}`,
             title: `Rendez-vous Improvisé (${size}×${size})`,
-            subtitle: `Grille ${size}×${size} générée à la volée et certifiée à solution unique par le solveur CSP.`,
+            subtitle: '',
             size,
             tokens,
             regions,
@@ -1651,6 +1864,8 @@
             clues,
             victoryStory: `Malgré les détours imprévus à travers les ${size} salons, B. et V. ont su déjouer la curiosité des témoins pour se retrouver seuls.`
           };
+
+          if (!requiresHypothesis && !this.addForcedClues(candidateChapter, target)) continue;
 
           let checkRes = CSPSolver.solve(candidateChapter, {}, 2, 25000);
 
@@ -1667,7 +1882,18 @@
             checkRes = CSPSolver.solve(candidateChapter, {}, 2, 25000);
           }
 
-          if (!checkRes.timedOut && checkRes.solutions.length === 1) {
+          const canSolveWithoutHypothesis = this.canSolveWithoutGuessing(candidateChapter);
+          if (
+            !checkRes.timedOut &&
+            checkRes.solutions.length === 1 &&
+            canSolveWithoutHypothesis === !requiresHypothesis
+          ) {
+            candidateChapter.requiresHypothesis = requiresHypothesis;
+            candidateChapter.subtitle = `Grille ${size}×${size} certifiée à solution unique et ${
+              requiresHypothesis
+                ? 'nécessitant une hypothèse selon les déductions reconnues'
+                : 'résoluble sans hypothèse'
+            }.`;
             return candidateChapter;
           }
         }
@@ -1680,7 +1906,12 @@
           const gen = this.generate(size);
           if (gen) {
             const verify = CSPSolver.solve(gen, {}, 2, 30000);
-            if (!verify.timedOut && verify.solutions.length === 1) {
+            const canSolveWithoutHypothesis = this.canSolveWithoutGuessing(gen);
+            if (
+              !verify.timedOut &&
+              verify.solutions.length === 1 &&
+              canSolveWithoutHypothesis === !gen.requiresHypothesis
+            ) {
               onSuccess(gen);
               return;
             }
@@ -1704,7 +1935,8 @@
       crossMode: false,
       autoCross: true,
       history: [],
-      cspResult: null
+      cspResult: null,
+      hypothesis: null
     };
 
     function getCoordLabel(r, c) {
@@ -1752,6 +1984,8 @@
       state.selectedToken = ch.tokens[0].id;
       state.crossMode = false;
       state.history = [];
+      state.hypothesis = null;
+      updateHypothesisControls();
       updateDifficultyBadge(ch, integrity);
 
       // Mise à jour visuelle immédiate de l'en-tête et du damier
@@ -1778,12 +2012,15 @@
     function generateRandomChapter(size) {
       const badge = document.getElementById('csp-status-badge');
       badge.className = 'inline-flex items-center gap-1 text-[11px] font-semibold px-2.5 py-1 rounded-full bg-amber-50 text-amber-900 border border-amber-300';
-      badge.innerHTML = `<span>⏳</span><span>Synthèse ${size}×${size} (recherche solution unique)…</span>`;
+      badge.innerHTML = `<span>⏳</span><span>Synthèse ${size}×${size} (certification CSP)…</span>`;
 
       PuzzleGenerator.generateGuaranteedUnique(size, (gen) => {
         CHAPTERS[3] = gen;
         loadChapter(3);
-        showFeedback('info', `Nouvelle grille ${size}×${size} synthétisée et certifiée à <strong>1 et 1 seule solution</strong> par le moteur CSP.`);
+        const progressionText = gen.requiresHypothesis
+          ? 'Elle nécessitera des hypothèses selon les déductions reconnues.'
+          : 'Elle se résout par placements forcés, sans hypothèse.';
+        showFeedback('info', `Nouvelle grille ${size}×${size} certifiée à <strong>1 et 1 seule solution</strong>. ${progressionText} Le bouton Hypothèse permet d'explorer puis d'annuler une piste.`);
       });
     }
 
@@ -1796,6 +2033,51 @@
         manualCrosses: new Set(state.manualCrosses)
       });
       if (state.history.length > 50) state.history.shift();
+    }
+
+    function updateHypothesisControls() {
+      const active = Boolean(state.hypothesis);
+      document.getElementById('hypothesis-btn')?.classList.toggle('hidden', active);
+      document.getElementById('rollback-hypothesis-btn')?.classList.toggle('hidden', !active);
+      document.getElementById('accept-hypothesis-btn')?.classList.toggle('hidden', !active);
+    }
+
+    function startHypothesis() {
+      if (state.hypothesis) return;
+      state.hypothesis = {
+        placements: JSON.parse(JSON.stringify(state.placements)),
+        manualCrosses: new Set(state.manualCrosses),
+        selectedToken: state.selectedToken,
+        history: state.history.map(entry => ({
+          placements: JSON.parse(JSON.stringify(entry.placements)),
+          manualCrosses: new Set(entry.manualCrosses)
+        }))
+      };
+      updateHypothesisControls();
+      if (state.cspResult) updateDeductionStatus(state.cspResult);
+      showFeedback('info', '<strong>Hypothèse activée :</strong> placez un pion pour explorer cette piste. Les placements hypothétiques sont marqués d’un <strong>?</strong> ; vous pourrez revenir à l’état précédent ou valider la piste.');
+    }
+
+    function rollbackHypothesis() {
+      if (!state.hypothesis) return;
+      state.placements = state.hypothesis.placements;
+      state.manualCrosses = state.hypothesis.manualCrosses;
+      state.selectedToken = state.hypothesis.selectedToken;
+      state.history = state.hypothesis.history;
+      state.hypothesis = null;
+      updateHypothesisControls();
+      hideFeedback();
+      renderAll();
+      runCSPProof();
+    }
+
+    function acceptHypothesis() {
+      if (!state.hypothesis) return;
+      state.hypothesis = null;
+      updateHypothesisControls();
+      hideFeedback();
+      renderAll();
+      runCSPProof();
     }
 
     function undoAction() {
@@ -1812,6 +2094,8 @@
       saveHistory();
       state.placements = {};
       state.manualCrosses = new Set();
+      state.hypothesis = null;
+      updateHypothesisControls();
       hideFeedback();
       renderAll();
       runCSPProof();
@@ -2085,6 +2369,7 @@
       if (counterEl) counterEl.textContent = `${placed} / ${total} placés`;
       const undoBtn = document.getElementById('undo-btn');
       if (undoBtn) undoBtn.disabled = state.history.length === 0;
+      updateHypothesisControls();
     }
 
     function renderPalette() {
@@ -2199,6 +2484,12 @@
           const regId = regions[r][c];
           const place = PLACES[regId] || PLACES.verriere;
           const tok = tokenAtCell[key];
+          const hypothesisOrigin = state.hypothesis?.placements[tok?.id];
+          const isHypothesisPlacement = Boolean(
+            tok &&
+            state.hypothesis &&
+            (!hypothesisOrigin || hypothesisOrigin.r !== r || hypothesisOrigin.c !== c)
+          );
           const lmKey = state.chapter.landmarks[key];
           const isManualX = state.manualCrosses.has(key);
           const isAutoX = !tok && !lmKey && autoCrosses.has(key);
@@ -2236,14 +2527,17 @@
           let inner = `<span class="absolute top-0.5 left-1 text-[9px] font-mono text-stone-600/60 pointer-events-none">${r + 1},${c + 1}</span>`;
 
           if (tok) {
+            if (isHypothesisPlacement) {
+              inner += '<span class="absolute top-0.5 right-1 z-10 rounded-full bg-amber-500 px-1 text-[9px] font-bold text-white shadow">?</span>';
+            }
             if (tok.id === 'B') {
-              inner += `<div class="token-animate w-[78%] h-[78%] rounded-full overflow-hidden border-2 border-[#6b1d3a] shadow-md bg-[#fcf8f3]">${SVG_ART.womanB}</div>`;
+              inner += `<div class="token-animate w-[78%] h-[78%] rounded-full overflow-hidden border-2 ${isHypothesisPlacement ? 'border-amber-500 ring-2 ring-amber-300' : 'border-[#6b1d3a]'} shadow-md bg-[#fcf8f3]">${SVG_ART.womanB}</div>`;
             } else if (tok.id === 'V') {
-              inner += `<div class="token-animate w-[78%] h-[78%] rounded-full overflow-hidden border-2 border-[#c67d63] shadow-md bg-[#fcf8f3]">${SVG_ART.manV}</div>`;
+              inner += `<div class="token-animate w-[78%] h-[78%] rounded-full overflow-hidden border-2 ${isHypothesisPlacement ? 'border-amber-500 ring-2 ring-amber-300' : 'border-[#c67d63]'} shadow-md bg-[#fcf8f3]">${SVG_ART.manV}</div>`;
             } else {
               const wSvg = SVG_ART[tok.artKey] || tok.short;
               inner += `
-                <div class="token-animate w-[76%] h-[76%] rounded-full overflow-hidden border-2 border-[#6b1d3a]/75 shadow-sm bg-[#fcf8f3] relative" title="${tok.name}">
+                <div class="token-animate w-[76%] h-[76%] rounded-full overflow-hidden border-2 ${isHypothesisPlacement ? 'border-amber-500 ring-2 ring-amber-300' : 'border-[#6b1d3a]/75'} shadow-sm bg-[#fcf8f3] relative" title="${tok.name}">
                   ${wSvg}
                   <span class="absolute bottom-0 inset-x-0 bg-[#491126]/85 text-[#fcf8f3] text-[8px] sm:text-[9px] font-bold leading-tight text-center py-[0.5px]">${tok.short}</span>
                 </div>`;
@@ -2314,6 +2608,47 @@
       });
     }
 
+    function updateDeductionStatus(proof) {
+      const badge = document.getElementById('deduction-status-badge');
+      if (!badge) return;
+
+      const baseClass = 'text-[11px] font-semibold px-2.5 py-1 rounded-full border';
+      const hypothesisChanged = Boolean(
+        state.hypothesis &&
+        state.chapter.tokens.some(({ id }) => {
+          const before = state.hypothesis.placements[id];
+          const current = state.placements[id];
+          return Boolean(before) !== Boolean(current) ||
+            (before && current && (before.r !== current.r || before.c !== current.c));
+        })
+      );
+      if (proof.timedOut) {
+        badge.className = `${baseClass} bg-amber-50 text-amber-900 border-amber-300`;
+        badge.textContent = '⏳ Déduction : indéterminée';
+        badge.title = 'Le solveur a atteint sa limite de calcul ; impossible de déterminer si une hypothèse est nécessaire.';
+      } else if (proof.solutions.length === 0) {
+        badge.className = `${baseClass} bg-rose-50 text-rose-900 border-rose-300`;
+        badge.textContent = state.hypothesis && hypothesisChanged ? '⚠️ Hypothèse réfutée' : '⚠️ Piste bloquée';
+        badge.title = 'Aucune solution ne respecte les placements actuels. Revenez en arrière ou corrigez un placement.';
+      } else if (proof.solutions.length > 1) {
+        badge.className = `${baseClass} bg-amber-50 text-amber-900 border-amber-300`;
+        badge.textContent = 'ℹ️ Plusieurs solutions';
+        badge.title = 'Plusieurs solutions restent compatibles ; les placements actuels ne permettent pas de trancher.';
+      } else if (state.hypothesis && !hypothesisChanged) {
+        badge.className = `${baseClass} bg-amber-50 text-amber-900 border-amber-300`;
+        badge.textContent = '💭 Hypothèse ouverte';
+        badge.title = 'Le point de retour est prêt. Placez un pion pour tester cette piste, puis validez-la ou revenez en arrière.';
+      } else if (CSPSolver.canSolveWithoutGuessing(state.chapter, state.placements)) {
+        badge.className = `${baseClass} bg-emerald-50 text-emerald-900 border-emerald-300`;
+        badge.textContent = state.hypothesis ? '✅ Suite déductible' : '✅ Sans hypothèse';
+        badge.title = 'Les placements restants peuvent être déterminés par les coups forcés reconnus par le solveur.';
+      } else {
+        badge.className = `${baseClass} bg-amber-50 text-amber-900 border-amber-300`;
+        badge.textContent = state.hypothesis ? '🤔 Autre hypothèse requise' : '🤔 Hypothèse requise';
+        badge.title = 'Aucun coup forcé reconnu ne permet de terminer. Selon les déductions implémentées, il faut essayer une piste ou utiliser une autre méthode de déduction.';
+      }
+    }
+
     function runCSPProof() {
       const badge = document.getElementById('csp-status-badge');
       if (!badge) return;
@@ -2322,6 +2657,7 @@
       const res = CSPSolver.solve(state.chapter, state.placements, 2, 30000);
       const dt = (performance.now() - t0).toFixed(1);
       state.cspResult = res;
+      updateDeductionStatus(res);
 
       const hasPlacements = Object.keys(state.placements).length > 0;
       if (res.timedOut) {

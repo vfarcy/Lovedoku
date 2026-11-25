@@ -260,13 +260,15 @@
 
         <div class="bg-white/90 rounded-xl p-3.5 border border-rose-200/70">
           <div class="font-bold text-[#6b1d3a] mb-1 flex items-center gap-1.5">
-            <span>💡 Indice logique et difficulté estimée</span>
+            <span>💡 Indice logique et difficulté de la grille</span>
           </div>
           <ul class="space-y-1 text-stone-700 leading-relaxed">
             <li>• <strong>Indice logique (CSP)</strong> propose une position tirée d'une solution compatible. Si une seule solution reste, cette position est forcée ; s'il en reste plusieurs, elle n'est qu'un exemple. En cas de recherche incomplète ou de contradiction, le message le précise.</li>
             <li>• Si les placements bloquent toute solution, l'indice peut signaler une contradiction et identifier un pion posé dont le retrait rétablit une possibilité ; si aucun pion isolé ne suffit, il signale une contradiction multiple.</li>
-            <li>• <strong>Difficulté estimée</strong> mesure une heuristique de recherche, pas la difficulté humaine ni le besoin d'hypothèse. Elle est calculée sur la grille vide : nœuds explorés par le CSP + 30 points par opérateur <strong>OU</strong> + 10 par <strong>NON</strong>.</li>
-            <li>• Catégories : <strong>Accessible</strong> jusqu'à 300 points ; <strong>Intermédiaire</strong> de 301 à 1 200 ; <strong>Soutenue</strong> au-delà. Deux grilles pouvant avoir la même catégorie, ce score ne distingue pas nécessairement les grilles avec et sans hypothèse.</li>
+            <li>• <strong>Difficulté de la grille</strong> est estimée une fois sur la grille vide ; elle ne change pas pendant la partie, contrairement au badge Progression. Elle tient compte du test de placements forcés et d'un score technique d'effort du solveur.</li>
+            <li>• L'effort du solveur additionne les nœuds explorés par le CSP, 30 points par opérateur <strong>OU</strong> et 10 par <strong>NON</strong>. Sa catégorie de base est <strong>Accessible</strong> jusqu'à 300 points, <strong>Intermédiaire</strong> de 301 à 1 200 et <strong>Soutenue</strong> au-delà.</li>
+            <li>• Si les placements forcés reconnus ne suffisent pas à terminer, la difficulté est au minimum <strong>Intermédiaire</strong>, même pour un score technique inférieur ou égal à 300. Deux grilles avec ou sans hypothèse peuvent toutefois partager une catégorie.</li>
+            <li>• C'est une estimation indicative, pas une mesure de difficulté humaine : d'autres déductions peuvent éviter une hypothèse. Survolez le badge pour voir l'effort du solveur et le résultat du test initial.</li>
             <li>• Aucune estimation n'est affichée si le solveur ne certifie pas une solution unique ou atteint sa limite.</li>
           </ul>
         </div>
@@ -324,8 +326,8 @@
             <span id="deduction-status-badge" title="Indique si les déductions automatiques reconnues suffisent depuis les placements actuels." class="text-[11px] font-semibold px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-900 border border-emerald-300">
               Progression : calcul…
             </span>
-            <span id="difficulty-badge" title="Estimation heuristique fondée sur l'effort du solveur et la composition logique des indices." class="text-[11px] font-semibold px-2.5 py-1 rounded-full bg-violet-50 text-violet-900 border border-violet-300">
-              Difficulté estimée
+            <span id="difficulty-badge" title="Estimation initiale fondée sur les déductions reconnues et l'effort du solveur." class="text-[11px] font-semibold px-2.5 py-1 rounded-full bg-violet-50 text-violet-900 border border-violet-300">
+              Difficulté de la grille : calcul…
             </span>
           </div>
           <h2 id="chapter-title" class="font-serif-romance text-2xl font-bold text-[#491126] mt-1">
@@ -1602,9 +1604,11 @@
           (sum, clue) => sum + this.ruleWeight(clue.rule),
           0
         );
-        if (score <= 300) return { label: 'Accessible', score };
-        if (score <= 1200) return { label: 'Intermédiaire', score };
-        return { label: 'Soutenue', score };
+        const requiresHypothesis = !CSPSolver.canSolveWithoutGuessing(chapter);
+        const label = score > 1200 ? 'Soutenue'
+          : score > 300 || requiresHypothesis ? 'Intermédiaire'
+          : 'Accessible';
+        return { label, score, requiresHypothesis };
       }
     };
 
@@ -1952,12 +1956,15 @@
       if (!badge) return;
       const estimate = PuzzleDifficulty.estimate(chapter, proof);
       if (!estimate) {
-        badge.textContent = 'Difficulté non estimée';
+        badge.textContent = 'Difficulté de la grille : non estimée';
         badge.title = 'Le solveur n’a pas pu établir une solution unique dans sa limite de calcul.';
         return;
       }
-      badge.textContent = `Difficulté estimée : ${estimate.label}`;
-      badge.title = `Score heuristique : ${estimate.score}. Il combine les nœuds explorés par le CSP et les opérateurs OU/NON ; il ne certifie pas la difficulté humaine.`;
+      badge.textContent = `Difficulté de la grille : ${estimate.label}`;
+      const progression = estimate.requiresHypothesis
+        ? 'Une hypothèse peut être nécessaire selon les déductions reconnues (difficulté au moins Intermédiaire).'
+        : 'Les placements forcés reconnus suffisent sur la grille initiale.';
+      badge.title = `Effort du solveur : ${estimate.score} points (nœuds CSP et opérateurs OU/NON). ${progression} Cette estimation ne certifie pas la difficulté humaine.`;
     }
 
     function loadChapter(idx) {

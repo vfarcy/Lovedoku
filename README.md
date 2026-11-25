@@ -105,7 +105,7 @@ automatique de l'indice.
 Le panneau **Ergonomie & Aide** (`?`) donne aussi des exemples pour distinguer
 les voisinages orthogonal, diagonal et du roi, comprendre les distances à pas de
 marche, les directions, les frontières de lieux et les combinaisons ET/OU/NON.
-Il explique également le calcul et les seuils de la difficulté estimée.
+Il explique également le calcul et les seuils de la difficulté de la grille.
 
 ## Chapitres
 
@@ -212,16 +212,20 @@ contraintes restantes. Si plusieurs solutions sont déjà trouvées, la position
 est présentée comme un exemple, et non comme une obligation. Si la recherche
 est interrompue par sa limite, l'indice signale que le résultat est incomplet.
 
-Le badge **Difficulté estimée** est une indication heuristique fondée sur les
-nœuds explorés par le solveur et la présence d'opérateurs OU/NON. Il décrit la
-complexité de recherche calculée, pas une difficulté humaine certifiée : une
-grille unique peut encore nécessiter une supposition pour un joueur. Le score
-est calculé au chargement du chapitre à partir de la grille vide : il additionne
-les nœuds CSP explorés, 30 points par opérateur OU et 10 points par opérateur
-NON. Les niveaux sont **Accessible** jusqu'à 300 points, **Intermédiaire** de
-301 à 1 200 points et **Soutenue** au-delà de 1 200 points. Si la recherche
-atteint sa limite ou ne certifie pas une solution unique, aucune estimation
-n'est affichée.
+Le badge **Difficulté de la grille** est une estimation calculée au chargement,
+sur la grille vide ; contrairement au badge **Progression**, elle reste fixe
+pendant la partie. Elle combine le test de placements forcés et un score
+technique d'**effort du solveur** : nœuds CSP explorés, plus 30 points par
+opérateur OU et 10 par opérateur NON.
+
+La catégorie de base est **Accessible** jusqu'à 300 points, **Intermédiaire**
+de 301 à 1 200 et **Soutenue** au-delà. Si les déductions reconnues ne suffisent
+pas à terminer sans hypothèse, la difficulté est au minimum **Intermédiaire**,
+même avec un score inférieur ou égal à 300. L'infobulle du badge donne le score
+technique et le résultat du test initial. Cette estimation ne certifie pas la
+difficulté humaine : une déduction plus avancée peut éviter une hypothèse.
+Si la recherche atteint sa limite ou ne certifie pas une solution unique, aucune
+estimation n'est affichée.
 
 ## Technologies et architecture
 

@@ -98,8 +98,10 @@ B. et V. sont placés dans le même lieu, le reste de ce lieu est également
 signalé comme exclu. Cette aide visuelle ne remplace pas les indices.
 
 Le bouton **Vider** retire les placements et les croix manuelles du chapitre
-courant. Les indices du carnet peuvent être cochés indépendamment pour suivre
-vos déductions ; leur coche est une annotation personnelle, pas une validation
+courant et ferme toutes les hypothèses ouvertes. **Annuler** peut restaurer les
+placements et les croix après cette action, mais pas les hypothèses fermées.
+Les indices du carnet peuvent être cochés indépendamment pour suivre vos
+déductions ; leur coche est une annotation personnelle, pas une validation
 automatique de l'indice.
 
 Le panneau **Ergonomie & Aide** (`?`) donne aussi des exemples pour distinguer
@@ -205,12 +207,16 @@ plafond est atteint, le résultat est affiché comme **indéterminé** et non co
 une preuve d'absence ou d'unicité.
 
 Le badge **Progression** indique, à partir des placements actuels, si le solveur
-voit une suite de coups forcés ou s'il est bloqué et recommande une hypothèse.
+voit une suite de coups forcés suffisante ou si une hypothèse peut être utile.
 Les déductions reconnues sont une case unique pour un jeton, ou une seule
 possibilité dans une ligne ou une colonne, en tenant compte des contradictions
-détectées dans les indices. **Hypothèse requise** signifie donc qu'aucun coup
-forcé de ces types n'a été trouvé ; une déduction humaine plus avancée peut
-toutefois éviter de supposer.
+détectées dans les indices. **Hypothèse requise** signifie que ces coups forcés
+ne suffisent pas à terminer la grille, même si certains restent possibles ; une
+déduction humaine plus avancée peut toutefois éviter de supposer.
+Sous une hypothèse modifiée, **Autre hypothèse requise** indique que la piste
+reste compatible avec une solution unique, mais que ces coups ne suffisent pas
+à la terminer. **Hypothèse réfutée** signale une piste sans complétion ; le badge
+CSP affiche alors **Piste bloquée : 0 solution**.
 
 Le bouton **Indice logique (CSP)** fournit une position compatible avec les
 contraintes restantes. Si plusieurs solutions sont déjà trouvées, la position

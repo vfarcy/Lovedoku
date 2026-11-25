@@ -213,7 +213,7 @@
             <li>• Choisissez une silhouette dans la palette, puis cliquez ou touchez une case libre pour la placer. Après un placement, la palette sélectionne automatiquement la prochaine silhouette non placée.</li>
             <li>• Pour retirer un pion sans le remplacer, sélectionnez d'abord ce même pion dans la palette, puis cliquez sur sa case. Si un autre pion est sélectionné, cliquer sur une case occupée le remplace.</li>
             <li>• <strong>Annuler</strong>, <kbd class="px-1 bg-stone-100 border rounded">Ctrl+Z</kbd> ou <kbd class="px-1 bg-stone-100 border rounded">Cmd+Z</kbd> annule le dernier placement ou changement de croix. Cela n'annule pas une coche du carnet ni l'ouverture d'une hypothèse.</li>
-            <li>• <strong>Vider</strong> enlève les placements et les croix manuelles de la grille courante ; cela ne décoche pas les témoignages.</li>
+            <li>• <strong>Vider</strong> enlève les placements et les croix manuelles et ferme toutes les hypothèses, sans décocher les témoignages. <strong>Annuler</strong> peut restaurer les placements et croix après cette action, mais pas les hypothèses fermées.</li>
             <li>• Sur clavier, utilisez <kbd class="px-1 bg-stone-100 border rounded">Tab</kbd> pour parcourir les commandes et cases, puis <kbd class="px-1 bg-stone-100 border rounded">Entrée</kbd> ou <kbd class="px-1 bg-stone-100 border rounded">Espace</kbd> pour activer le contrôle ciblé.</li>
             <li>• <kbd class="px-1 bg-stone-100 border rounded">?</kbd> affiche ou masque cette aide ; <kbd class="px-1 bg-stone-100 border rounded">Échap</kbd> ferme la fenêtre de victoire.</li>
           </ul>
@@ -239,7 +239,7 @@
             <li>• Le solveur vérifie les lignes, colonnes, lieux, repères et témoignages. Il actualise le résultat après les changements de placement ; les croix manuelles n'entrent pas dans ce calcul.</li>
             <li>• <strong>Preuve CSP : 1 solution</strong> certifie une solution complète unique. Avec des placements déjà posés, <strong>Piste valide : 1 solution</strong> signifie qu'il reste une complétion possible et unique.</li>
             <li>• <strong>2+ solutions</strong> signifie qu'au moins deux complétions ont été trouvées : les placements actuels ne déterminent pas encore une réponse unique. La recherche s'arrête après en avoir trouvé deux.</li>
-            <li>• <strong>0 solution / Piste bloquée</strong> signifie qu'aucune complétion ne respecte les règles avec les placements actuels. Sous une hypothèse modifiée, le badge devient <strong>Hypothèse réfutée</strong>.</li>
+            <li>• <strong>0 solution / Piste bloquée</strong> signifie qu'aucune complétion ne respecte les règles avec les placements actuels. Si l'hypothèse active a été modifiée, le badge Progression indique <strong>Hypothèse réfutée</strong>.</li>
             <li>• <strong>Indéterminé</strong> signifie que la limite de recherche a été atteinte ; ce n'est ni une preuve d'absence de solution, ni une preuve d'unicité.</li>
           </ul>
         </div>
@@ -251,9 +251,10 @@
           <ul class="space-y-1 text-stone-700 leading-relaxed">
             <li>• <strong>Sans hypothèse</strong> indique que les règles automatiques trouvent une suite de placements forcés à partir de la grille actuelle. Le badge est recalculé après vos placements.</li>
             <li>• Le test reconnaît une seule case possible pour un pion, ou une seule possibilité dans une ligne ou une colonne. Il ne couvre pas toutes les techniques de déduction humaines.</li>
-            <li>• <strong>Hypothèse requise</strong> signifie qu'aucun de ces coups forcés n'a été trouvé ; une déduction plus avancée peut néanmoins permettre de continuer sans supposer.</li>
+            <li>• <strong>Hypothèse requise</strong> signifie que ces coups forcés ne suffisent pas à terminer la grille ; certains peuvent encore être possibles. Une déduction plus avancée peut néanmoins permettre de continuer sans supposer.</li>
             <li>• <strong>Plusieurs solutions</strong>, <strong>Piste bloquée</strong> et <strong>Indéterminée</strong> décrivent respectivement plusieurs complétions, aucune complétion, ou une recherche interrompue.</li>
             <li>• Pendant une hypothèse, <strong>Hypothèse ouverte</strong> signifie que le point de retour est prêt ; <strong>Suite déductible</strong> indique que les coups forcés reconnus suffisent à partir des placements testés.</li>
+            <li>• <strong>Autre hypothèse requise</strong> indique que la piste modifiée reste compatible avec une solution unique, mais que les coups forcés reconnus ne suffisent pas à la terminer. Vous pouvez poursuivre vos déductions, ouvrir une sous-hypothèse ou revenir en arrière.</li>
             <li>• Ce badge ne prouve pas que le puzzle est unique : l'unicité est indiquée séparément par le badge CSP.</li>
           </ul>
         </div>
